@@ -1,12 +1,7 @@
-import "./App.css";
 import MapPage from "./pages/MapPage";
 
 function App() {
-  return (
-    <>
-      <MapPage />
-    </>
-  );
+  return <MapPage />;
 }
 
 export default App;
