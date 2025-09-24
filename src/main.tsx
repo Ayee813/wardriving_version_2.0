@@ -10,6 +10,8 @@ import LoginPage from "./pages/LoginPage";
 import PrivateRoute from "./components/PrivateRoute";
 import AdminDashBoard from "./pages/admin/AdminDashBoard";
 import AdminUploadPage from "./pages/admin/AdminUploadPage";
+import AdminAnalysisPage from "./pages/admin/AdminAnalysisPage";
+import AdminMapPage from "./pages/admin/AdminMapPage";
 import Layout from "./layouts/Layout";
 import "./index.css";
 
@@ -42,7 +44,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           >
             {/* Admin Upload Page - handles file uploads for wardriving data */}
             <Route path="upload" element={<AdminUploadPage />} />
-            
+
+            {/* Admin Analysis Page - displays analysis charts for admin */}
+            <Route path="analysis" element={<AdminAnalysisPage />} />
+
+            <Route path="map" element={<AdminMapPage />} />
+
             {/* Dashboard main content - overview/home page for admin panel */}
             {/* <Route path="dashboard" element={<DashboardContent />} /> */}
             

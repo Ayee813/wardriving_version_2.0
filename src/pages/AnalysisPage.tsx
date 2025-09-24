@@ -1,10 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { DeviceTypeChart } from "@/components/analysis/DeviceTypeChart";
-import { FrequencyChart } from "@/components/analysis/FrequencyChart";
-import { EncryptionTypeChart } from "@/components/analysis/EncryptionTypeChar";
-import { ChannelChart } from "@/components/analysis/ChannelChart";
-import { SignalStrengthChart } from "@/components/analysis/SignalStrengthChart";
-import { AuthenticationMethodsChart } from "@/components/analysis/AuthenticationChart";
+import AllChartContainer from "@/components/analysis/AllChartContainer";
 
 export default function AnalysisPage() {
   return (
@@ -17,14 +12,9 @@ export default function AnalysisPage() {
           </div>
         </Card>
       </div>
-      <div className="grid grid-cols-4 gap-4 p-8">
-        <DeviceTypeChart />
-          <FrequencyChart />
-          <EncryptionTypeChart />
-          <ChannelChart />
-          <SignalStrengthChart />
-          <AuthenticationMethodsChart />
-      </div>
+      {/** Charts will be rendered here */}
+      <AllChartContainer />
+
     </div>
   );
 }

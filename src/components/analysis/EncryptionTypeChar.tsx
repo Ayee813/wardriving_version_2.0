@@ -47,7 +47,7 @@ export function EncryptionTypeChart() {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0">
+      <CardHeader className="items-center pb-0 border-b">
         <CardTitle>Encryption Type</CardTitle>
       </CardHeader>
       <CardContent className="flex-1 pb-0">

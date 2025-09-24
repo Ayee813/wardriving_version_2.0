@@ -57,11 +57,11 @@ const data = {
         },
         {
           title: "Map",
-          url: "/admin/dashboard/map",
+          url: "/admin/map",
         },
         {
           title: "Analytics",
-          url: "/admin/dashboard/analytics",
+          url: "/admin/analysis",
         },
       ],
     },
