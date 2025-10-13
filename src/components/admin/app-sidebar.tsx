@@ -1,13 +1,14 @@
 "use client";
 
 import * as React from "react";
-import {
-  AudioWaveform,
-  Command,
-  GalleryVerticalEnd,
-} from "lucide-react";
+import { AudioWaveform, Command, GalleryVerticalEnd } from "lucide-react";
 
-import { IconAccessPoint, IconAutomation, IconUpload, IconMessage } from "@tabler/icons-react";
+import {
+  IconAccessPoint,
+  IconAutomation,
+  IconUpload,
+  IconMessage,
+} from "@tabler/icons-react";
 
 import { NavMain } from "@/components/admin/nav-main";
 import { NavProjects } from "@/components/admin/nav-projects";
@@ -20,7 +21,7 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 
-// Updated data with proper admin routes
+// Updated data with items always visible (no dropdown/collapse)
 const data = {
   user: {
     name: "admin",
@@ -50,6 +51,7 @@ const data = {
       url: "/admin/dashboard",
       icon: IconAccessPoint,
       isActive: true,
+      isOpen: true, // Always keep expanded
       items: [
         {
           title: "Statistics",
@@ -69,6 +71,7 @@ const data = {
       title: "Process Files",
       url: "/admin/process",
       icon: IconAutomation,
+      isOpen: true, // Always keep expanded
       items: [
         {
           title: "Process CSV & KML",
@@ -84,6 +87,7 @@ const data = {
       title: "Upload Files",
       url: "/admin/upload",
       icon: IconUpload,
+      isOpen: true, // Always keep expanded
       items: [
         {
           title: "Upload",
