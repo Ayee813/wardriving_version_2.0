@@ -1,0 +1,24 @@
+.main-container {
+  width: 4rem;
+  height: 4rem;
+  /* background-color: blue; */
+  border-radius: 100%;
+  border: 3px solid var(--color-primary);
+  place-content: center;
+  border-right: transparent;
+  border-top: none;
+  animation: spinner 0.8s infinite;
+}
+
+.root-container {
+  transform: translate(50%, 50%);
+}
+
+@keyframes spinner {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: translate(0deg);
+  }
+}
