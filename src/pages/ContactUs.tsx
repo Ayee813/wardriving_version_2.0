@@ -1,6 +1,6 @@
 
 export default function ContactUs() {
   return (
-    <div>ContactUs</div>
+    <div className="">ContactUs</div>
   )
 }

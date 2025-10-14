@@ -42,7 +42,7 @@ export default function MapAside({ isOpen, onToggle }: MapAsideProps) {
       {/* Toggle button */}
       <button
         onClick={onToggle}
-        className={`absolute left-0 top-4 transform -translate-x-full bg-white shadow-lg rounded-l-md p-2 hover:bg-gray-50 transition-colors duration-200 z-10`}
+        className={`absolute left-0 top-4 transform -translate-x-full bg-white shadow-lg rounded-l-md p-2 hover:bg-gray-50 transition-colors duration-200 z-10 cursor-pointer`}
         aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       >
         <svg
