@@ -1,156 +1,188 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { WiFiData, getSignalColor, getSignalStrength, getSecurityLevel } from '@/type/wifi';
+import { LOCATION_ICONS } from '@/constants/location_icon';
 
 interface WiFiMarkersProps {
   data: WiFiData[];
 }
 
-const createCustomIcon = (signal: number) => {
-  const color = getSignalColor(signal);
-  return L.divIcon({
-    html: `
-      <div style="
-        background-color: ${color};
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        border: 2px solid white;
-        box-shadow: 0 0 4px rgba(0,0,0,0.3);
-      "></div>
-    `,
-    className: 'custom-marker',
-    iconSize: [12, 12],
-    iconAnchor: [6, 6],
+// Cache for custom icons to avoid recreating them
+const iconCache = new Map<string, L.Icon>();
+
+const getLocationIcon = (signal: number): string => {
+  if (signal >= -50) return LOCATION_ICONS.green;
+  else if (signal >= -70) return LOCATION_ICONS.yellow;
+  else return LOCATION_ICONS.red;
+};
+
+const createCustomIcon = (signal: number): L.Icon => {
+  const iconUrl = getLocationIcon(signal);
+  const cacheKey = `${iconUrl}-${signal}`;
+  
+  if (iconCache.has(cacheKey)) {
+    return iconCache.get(cacheKey)!;
+  }
+  
+  const icon = L.icon({
+    iconUrl: iconUrl,
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+    shadowUrl: undefined,
+    className: 'wifi-location-marker',
   });
+  
+  iconCache.set(cacheKey, icon);
+  return icon;
+};
+
+// Optimized popup content generator - only creates HTML when needed
+const createPopupContent = (wifi: WiFiData): string => {
+  const security = getSecurityLevel(wifi.AUTHENTICATION);
+  const signalStrength = getSignalStrength(wifi.signal);
+  const signalColor = getSignalColor(wifi.signal);
+  
+  return `
+    <div style="font-family:system-ui;background:#fff;color:#333;border-radius:8px;overflow:hidden;min-width:320px">
+      <div style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 100%);padding:16px;border-bottom:1px solid #e5e7eb">
+        <div style="font-weight:700;font-size:18px;color:#fff;margin-bottom:4px;display:flex;align-items:center;gap:8px">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"></path>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+            <line x1="12" y1="20" x2="12.01" y2="20"></line>
+          </svg>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${wifi.SSID || '🔒 Hidden Network'}</span>
+        </div>
+        <div style="font-size:12px;color:#fff;opacity:0.9;font-family:monospace">${wifi.BSSID}</div>
+      </div>
+      <div style="padding:16px">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <div style="flex:1;min-width:140px;padding:10px 12px;border-radius:6px;background:${signalColor}15;border:1.5px solid ${signalColor}">
+            <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Signal Strength</div>
+            <div style="font-size:16px;font-weight:700;color:${signalColor};display:flex;align-items:baseline;gap:6px">
+              <span>${wifi.signal}</span>
+              <span style="font-size:12px;opacity:0.8">dBm</span>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:${signalColor};margin-top:2px;text-transform:capitalize">${signalStrength}</div>
+          </div>
+          <div style="flex:1;min-width:140px;padding:10px 12px;border-radius:6px;background:${security.color}15;border:1.5px solid ${security.color}">
+            <div style="font-size:11px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Security</div>
+            <div style="font-size:14px;font-weight:700;color:${security.color};display:flex;align-items:center;gap:6px">
+              ${security.level === 'high' ? '🔒' : security.level === 'medium' ? '🔓' : '⚠️'}
+              <span>${wifi.AUTHENTICATION}</span>
+            </div>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding:12px;background:#f9fafb;border-radius:6px;border:1px solid #e5e7eb">
+          <div style="grid-column:span 2">
+            <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Radio Type</div>
+            <div style="font-size:13px;font-weight:600;color:#333">${wifi['RADIO TYPE']}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Channel</div>
+            <div style="font-size:14px;font-weight:700;color:#3b82f6">${wifi.CHANNEL}</div>
+          </div>
+          <div>
+            <div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Frequency</div>
+            <div style="font-size:13px;font-weight:600;color:#333">${wifi.frequency} <span style="font-size:11px;opacity:0.7">MHz</span></div>
+          </div>
+          ${wifi.ENCRYPTION ? `<div style="grid-column:span 2"><div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Encryption</div><div style="font-size:13px;font-weight:600;color:#333">${wifi.ENCRYPTION}</div></div>` : ''}
+          ${wifi.MANUFACTURER ? `<div style="grid-column:span 2"><div style="font-size:10px;font-weight:600;color:#6b7280;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Vendor</div><div style="font-size:13px;font-weight:600;color:#333">${wifi.MANUFACTURER}</div></div>` : ''}
+        </div>
+        <div style="margin-top:12px;padding-top:12px;border-top:1px solid #e5e7eb;display:flex;gap:16px;font-size:11px;font-family:monospace;color:#6b7280">
+          <div style="flex:1"><span style="opacity:0.7">LAT:</span><span style="margin-left:4px;font-weight:600">${wifi.latitude.toFixed(6)}</span></div>
+          <div style="flex:1"><span style="opacity:0.7">LON:</span><span style="margin-left:4px;font-weight:600">${wifi.longitude.toFixed(6)}</span></div>
+        </div>
+      </div>
+    </div>
+  `;
 };
 
 export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   const map = useMap();
 
+  // Memoize cluster options to prevent recreating on each render
+  const clusterOptions = useMemo(() => ({
+    chunkedLoading: true,
+    chunkInterval: 200, // Process markers in chunks
+    chunkDelay: 50, // Delay between chunks
+    maxClusterRadius: 50,
+    spiderfyOnMaxZoom: true,
+    showCoverageOnHover: false,
+    zoomToBoundsOnClick: true,
+    disableClusteringAtZoom: 18,
+    spiderfyDistanceMultiplier: 2,
+    iconCreateFunction: (cluster: L.MarkerCluster) => {
+      const count = cluster.getChildCount();
+      let size = 44;
+      
+      if (count > 100) size = 64;
+      else if (count > 50) size = 54;
+      
+      return L.divIcon({
+        html: `<div style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 50%,#1d4ed8 100%);color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${size/2.8}px;border:3px solid #fff;box-shadow:0 4px 12px rgba(59,130,246,0.4),0 2px 4px rgba(0,0,0,0.2)"><span>${count}</span></div>`,
+        className: 'marker-cluster',
+        iconSize: L.point(size, size),
+      });
+    },
+  }), []);
+
   useEffect(() => {
     if (!map || !data || data.length === 0) return;
 
-    // Create marker cluster group
-    const markerClusterGroup = L.markerClusterGroup({
-      chunkedLoading: true,
-      maxClusterRadius: 50,
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true,
-      iconCreateFunction: (cluster) => {
-        const count = cluster.getChildCount();
-        let size = 40;
+    // Create marker cluster group with optimized settings
+    const markerClusterGroup = L.markerClusterGroup(clusterOptions);
+
+    // Batch process markers for better performance
+    const batchSize = 100;
+    let currentIndex = 0;
+
+    const processBatch = () => {
+      const endIndex = Math.min(currentIndex + batchSize, data.length);
+      const batch: L.Marker[] = [];
+
+      for (let i = currentIndex; i < endIndex; i++) {
+        const wifi = data[i];
         
-        if (count > 100) {
-          size = 60;
-        } else if (count > 50) {
-          size = 50;
-        }
-        
-        return L.divIcon({
-          html: `
-            <div style="
-              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-              color: white;
-              border-radius: 50%;
-              width: ${size}px;
-              height: ${size}px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              font-weight: bold;
-              font-size: ${size / 3}px;
-              border: 3px solid white;
-              box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            ">
-              ${count}
-            </div>
-          `,
-          className: 'marker-cluster',
-          iconSize: L.point(size, size),
+        // Create marker
+        const marker = L.marker([wifi.latitude, wifi.longitude], {
+          icon: createCustomIcon(wifi.signal),
         });
-      },
-    });
 
-    // Add markers to cluster group
-    data.forEach((wifi) => {
-      const security = getSecurityLevel(wifi.AUTHENTICATION);
-      
-      const marker = L.marker([wifi.latitude, wifi.longitude], {
-        icon: createCustomIcon(wifi.signal),
-      });
+        // Lazy load popup - only create content when popup is opened
+        marker.on('click', () => {
+          if (!marker.getPopup()) {
+            marker.bindPopup(createPopupContent(wifi), { 
+              maxWidth: 360,
+              className: 'wifi-custom-popup',
+              autoPan: true,
+              autoPanPadding: [50, 50],
+            });
+          }
+        });
 
-      const popupContent = `
-        <div style="font-family: system-ui, -apple-system, sans-serif;">
-          <div style="font-weight: bold; font-size: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; margin-bottom: 8px; color: #1f2937;">
-            ${wifi.SSID || 'Hidden Network'}
-          </div>
-          
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
-            <div>
-              <span style="font-weight: 600; color: #4b5563;">Signal:</span>
-              <div style="display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 4px; background-color: ${getSignalColor(wifi.signal)}; color: white; font-size: 11px;">
-                ${wifi.signal} dBm (${getSignalStrength(wifi.signal)})
-              </div>
-            </div>
-            
-            <div>
-              <span style="font-weight: 600; color: #4b5563;">Security:</span>
-              <div style="display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 4px; background-color: ${security.color}; color: white; font-size: 11px;">
-                ${wifi.AUTHENTICATION}
-              </div>
-            </div>
-            
-            <div style="grid-column: span 2;">
-              <span style="font-weight: 600; color: #4b5563;">MAC:</span>
-              <span style="margin-left: 8px; font-family: monospace; font-size: 11px;">${wifi.BSSID}</span>
-            </div>
-            
-            <div>
-              <span style="font-weight: 600; color: #4b5563;">Channel:</span>
-              <span style="margin-left: 8px;">${wifi.CHANNEL}</span>
-            </div>
-            
-            <div>
-              <span style="font-weight: 600; color: #4b5563;">Frequency:</span>
-              <span style="margin-left: 8px;">${wifi.frequency} MHz</span>
-            </div>
-            
-            <div style="grid-column: span 2;">
-              <span style="font-weight: 600; color: #4b5563;">Type:</span>
-              <span style="margin-left: 8px;">${wifi['RADIO TYPE']}</span>
-            </div>
-            
-            ${wifi.ENCRYPTION ? `
-              <div style="grid-column: span 2;">
-                <span style="font-weight: 600; color: #4b5563;">Encryption:</span>
-                <span style="margin-left: 8px;">${wifi.ENCRYPTION}</span>
-              </div>
-            ` : ''}
-            
-            ${wifi.MANUFACTURER ? `
-              <div style="grid-column: span 2;">
-                <span style="font-weight: 600; color: #4b5563;">Vendor:</span>
-                <span style="margin-left: 8px; font-size: 11px;">${wifi.MANUFACTURER}</span>
-              </div>
-            ` : ''}
-            
-            <div style="grid-column: span 2; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;">
-              <div>Lat: ${wifi.latitude.toFixed(6)}</div>
-              <div>Lon: ${wifi.longitude.toFixed(6)}</div>
-            </div>
-          </div>
-        </div>
-      `;
+        batch.push(marker);
+      }
 
-      marker.bindPopup(popupContent, { maxWidth: 300 });
-      markerClusterGroup.addLayer(marker);
-    });
+      // Add batch to cluster group
+      markerClusterGroup.addLayers(batch);
+
+      currentIndex = endIndex;
+
+      // Continue processing if there are more markers
+      if (currentIndex < data.length) {
+        requestAnimationFrame(processBatch);
+      }
+    };
+
+    // Start processing batches
+    processBatch();
 
     // Add cluster group to map
     map.addLayer(markerClusterGroup);
@@ -158,8 +190,9 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
     // Cleanup function
     return () => {
       map.removeLayer(markerClusterGroup);
+      markerClusterGroup.clearLayers();
     };
-  }, [map, data]);
+  }, [map, data, clusterOptions]);
 
   return null;
 };
