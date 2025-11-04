@@ -1,9 +1,12 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LocationButton from "@/components/map/LocationButton";
 import { getCurrentPosition, LocationPosition } from "@/utils/locationUtils";
+import { WiFiData } from "@/type/wifi";
+import { WiFiMarkers } from "@/components/map/WiFiMarkers";
+import { loadCSVFromPath } from "@/utils/csvParser";
 
 interface MapComponentProps {
   userLocation: LocationPosition | null;
@@ -32,6 +35,34 @@ export default function MapComponent({
 }: MapComponentProps) {
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
+  
+  // WiFi data state
+  const [wifiData, setWifiData] = useState<WiFiData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load WiFi data on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Try to load from the assets folder - adjust path as needed
+        const data = await loadCSVFromPath('/src/assets/CSV_FILE/Chanthabuly merge all zone.csv');
+        
+        setWifiData(data);
+        console.log(`Successfully loaded ${data.length} WiFi access points`);
+      } catch (err) {
+        console.error('Error loading WiFi data:', err);
+        setError('Failed to load WiFi data. Please check the CSV file path.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, []);
 
   // Handle location detection
   const handleLocationDetection = async () => {
@@ -45,7 +76,7 @@ export default function MapComponent({
     }
   };
 
-  // Effect to handle location updates
+  // Effect to handle user location updates
   useEffect(() => {
     if (userLocation && mapRef.current) {
       // Remove existing marker if any
@@ -99,6 +130,32 @@ export default function MapComponent({
 
   return (
     <div className="relative h-full w-full">
+      {/* Loading indicator */}
+      {loading && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+            <span className="text-sm font-medium">Loading WiFi data...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Error message */}
+      {error && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg max-w-md">
+          <p className="text-sm">{error}</p>
+        </div>
+      )}
+
+      {/* WiFi data counter */}
+      {!loading && !error && wifiData.length > 0 && (
+        <div className="absolute top-4 left-4 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="text-sm">
+            <span className="font-semibold">Access Points:</span> {wifiData.length}
+          </div>
+        </div>
+      )}
+
       <MapContainer
         center={center}
         zoom={zoom}
@@ -118,6 +175,9 @@ export default function MapComponent({
         />
 
         <ZoomControl position={zoomControlPosition} />
+
+        {/* Render WiFi markers when data is loaded */}
+        {!loading && !error && wifiData.length > 0 && <WiFiMarkers data={wifiData} />}
       </MapContainer>
 
       {/* Location button */}
@@ -126,6 +186,35 @@ export default function MapComponent({
           position={locationButtonPosition}
           onClick={handleLocationDetection}
         />
+      )}
+
+      {/* Signal Strength Legend */}
+      {!loading && !error && wifiData.length > 0 && (
+        <div className="absolute bottom-20 left-4 z-[1000] bg-white p-3 rounded-lg shadow-lg">
+          <div className="text-sm font-semibold mb-2">Signal Strength</div>
+          <div className="space-y-1 text-xs">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+              <span>Excellent (≥ -50 dBm)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#84cc16' }}></div>
+              <span>Good (-50 to -60 dBm)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#eab308' }}></div>
+              <span>Fair (-60 to -70 dBm)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f97316' }}></div>
+              <span>Poor (-70 to -80 dBm)</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
+              <span>Very Poor (&lt; -80 dBm)</span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
