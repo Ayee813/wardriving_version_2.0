@@ -15,9 +15,27 @@ interface WiFiMarkersProps {
 const iconCache = new Map<string, L.Icon>();
 
 const getLocationIcon = (signal: number): string => {
-  if (signal >= -50) return LOCATION_ICONS.green;
-  else if (signal >= -70) return LOCATION_ICONS.yellow;
-  else return LOCATION_ICONS.red;
+  console.log('Signal value:', signal); // Debug log
+  
+  // Ensure signal is a number
+  const signalValue = typeof signal === 'number' ? signal : parseFloat(signal);
+  
+  if (isNaN(signalValue)) {
+    console.warn('Invalid signal value:', signal);
+    return LOCATION_ICONS.red; // Default to red for invalid values
+  }
+  
+  // WiFi signal strength ranges (in dBm - negative values)
+  if (signalValue >= -50) {
+    console.log('Using green icon for signal:', signalValue);
+    return LOCATION_ICONS.green;
+  } else if (signalValue >= -70) {
+    console.log('Using yellow icon for signal:', signalValue);
+    return LOCATION_ICONS.yellow;
+  } else {
+    console.log('Using red icon for signal:', signalValue);
+    return LOCATION_ICONS.red;
+  }
 };
 
 const createCustomIcon = (signal: number): L.Icon => {
@@ -27,6 +45,8 @@ const createCustomIcon = (signal: number): L.Icon => {
   if (iconCache.has(cacheKey)) {
     return iconCache.get(cacheKey)!;
   }
+  
+  console.log('Creating icon with URL:', iconUrl); // Debug log
   
   const icon = L.icon({
     iconUrl: iconUrl,
@@ -41,7 +61,7 @@ const createCustomIcon = (signal: number): L.Icon => {
   return icon;
 };
 
-// Optimized popup content generator - only creates HTML when needed
+// Optimized popup content generator
 const createPopupContent = (wifi: WiFiData): string => {
   const security = getSecurityLevel(wifi.AUTHENTICATION);
   const signalStrength = getSignalStrength(wifi.signal);
@@ -107,11 +127,20 @@ const createPopupContent = (wifi: WiFiData): string => {
 export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   const map = useMap();
 
-  // Memoize cluster options to prevent recreating on each render
+  // Log icon paths on mount to verify they're loaded correctly
+  useEffect(() => {
+    console.log('Location Icons:', {
+      green: LOCATION_ICONS.green,
+      yellow: LOCATION_ICONS.yellow,
+      red: LOCATION_ICONS.red
+    });
+  }, []);
+
+  // Memoize cluster options
   const clusterOptions = useMemo(() => ({
     chunkedLoading: true,
-    chunkInterval: 200, // Process markers in chunks
-    chunkDelay: 50, // Delay between chunks
+    chunkInterval: 200,
+    chunkDelay: 50,
     maxClusterRadius: 50,
     spiderfyOnMaxZoom: true,
     showCoverageOnHover: false,
@@ -136,10 +165,10 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   useEffect(() => {
     if (!map || !data || data.length === 0) return;
 
-    // Create marker cluster group with optimized settings
+    // Create marker cluster group
     const markerClusterGroup = L.markerClusterGroup(clusterOptions);
 
-    // Batch process markers for better performance
+    // Batch process markers
     const batchSize = 100;
     let currentIndex = 0;
 
@@ -150,12 +179,17 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
       for (let i = currentIndex; i < endIndex; i++) {
         const wifi = data[i];
         
+        // Log first few signal values for debugging
+        if (i < 5) {
+          console.log(`WiFi ${i} - SSID: ${wifi.SSID}, Signal: ${wifi.signal}`);
+        }
+        
         // Create marker
         const marker = L.marker([wifi.latitude, wifi.longitude], {
           icon: createCustomIcon(wifi.signal),
         });
 
-        // Lazy load popup - only create content when popup is opened
+        // Lazy load popup
         marker.on('click', () => {
           if (!marker.getPopup()) {
             marker.bindPopup(createPopupContent(wifi), { 
@@ -170,24 +204,17 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
         batch.push(marker);
       }
 
-      // Add batch to cluster group
       markerClusterGroup.addLayers(batch);
-
       currentIndex = endIndex;
 
-      // Continue processing if there are more markers
       if (currentIndex < data.length) {
         requestAnimationFrame(processBatch);
       }
     };
 
-    // Start processing batches
     processBatch();
-
-    // Add cluster group to map
     map.addLayer(markerClusterGroup);
 
-    // Cleanup function
     return () => {
       map.removeLayer(markerClusterGroup);
       markerClusterGroup.clearLayers();

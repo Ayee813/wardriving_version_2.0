@@ -4904,7 +4904,8 @@ export const getSecurityLevel = (auth: string): { level: string; color: string }
   if (auth.includes('WPA3')) return { level: 'High', color: '#22c55e' };
   if (auth.includes('WPA2')) return { level: 'Medium', color: '#eab308' };
   return { level: 'Low', color: '#f97316' };
-};// src/utils/locationUtils.ts
+};
+// src/utils/locationUtils.ts
 
 export interface LocationPosition {
   latitude: number;
