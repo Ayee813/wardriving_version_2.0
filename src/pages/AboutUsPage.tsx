@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import "./AboutUsPage.css";
 import Loading from "@/components/Loading/Loading";
-import Cybergroup from "./../../public/cybergroup.jpg";
-import test from "./../../public/test.jpg";
-import test3 from "./../../public/test3.jpg";
-import test4 from "./../../public/test4.jpg";
+import Cybergroup from "@/assets/images/cybergroup.jpg";
+import test from "@/assets/images/test.jpg";
+import test3 from "@/assets/images/test3.jpg";
+import test4 from "@/assets/images/test4.jpg";
 
 
 export default function AboutUsPage() {
