@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -11,58 +11,39 @@ interface WiFiMarkersProps {
   data: WiFiData[];
 }
 
-// Cache for custom icons to avoid recreating them
-const iconCache = new Map<string, L.Icon>();
+// Shared icon instances
+const iconInstances = {
+  green: null as L.Icon | null,
+  yellow: null as L.Icon | null,
+  red: null as L.Icon | null,
+};
 
-const getLocationIcon = (signal: number): string => {
-  console.log('Signal value:', signal); // Debug log
-  
-  // Ensure signal is a number
+const getOrCreateIcon = (color: 'green' | 'yellow' | 'red'): L.Icon => {
+  if (!iconInstances[color]) {
+    iconInstances[color] = L.icon({
+      iconUrl: LOCATION_ICONS[color],
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+      className: 'wifi-location-marker',
+    });
+  }
+  return iconInstances[color]!;
+};
+
+const getIconForSignal = (signal: number): L.Icon => {
   const signalValue = typeof signal === 'number' ? signal : parseFloat(signal);
   
-  if (isNaN(signalValue)) {
-    console.warn('Invalid signal value:', signal);
-    return LOCATION_ICONS.red; // Default to red for invalid values
-  }
-  
-  // WiFi signal strength ranges (in dBm - negative values)
-  if (signalValue >= -50) {
-    console.log('Using green icon for signal:', signalValue);
-    return LOCATION_ICONS.green;
-  } else if (signalValue >= -70) {
-    console.log('Using yellow icon for signal:', signalValue);
-    return LOCATION_ICONS.yellow;
+  if (isNaN(signalValue) || signalValue < -70) {
+    return getOrCreateIcon('red');
+  } else if (signalValue >= -50) {
+    return getOrCreateIcon('green');
   } else {
-    console.log('Using red icon for signal:', signalValue);
-    return LOCATION_ICONS.red;
+    return getOrCreateIcon('yellow');
   }
 };
 
-const createCustomIcon = (signal: number): L.Icon => {
-  const iconUrl = getLocationIcon(signal);
-  const cacheKey = `${iconUrl}-${signal}`;
-  
-  if (iconCache.has(cacheKey)) {
-    return iconCache.get(cacheKey)!;
-  }
-  
-  console.log('Creating icon with URL:', iconUrl); // Debug log
-  
-  const icon = L.icon({
-    iconUrl: iconUrl,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-    shadowUrl: undefined,
-    className: 'wifi-location-marker',
-  });
-  
-  iconCache.set(cacheKey, icon);
-  return icon;
-};
-
-// Optimized popup content generator
-const createPopupContent = (wifi: WiFiData): string => {
+const createSingleWiFiPopup = (wifi: WiFiData): string => {
   const security = getSecurityLevel(wifi.AUTHENTICATION);
   const signalStrength = getSignalStrength(wifi.signal);
   const signalColor = getSignalColor(wifi.signal);
@@ -126,37 +107,53 @@ const createPopupContent = (wifi: WiFiData): string => {
 
 export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   const map = useMap();
+  const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
+  const expandedLayerRef = useRef<L.LayerGroup | null>(null);
+  const activeClusterRef = useRef<L.MarkerCluster | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Log icon paths on mount to verify they're loaded correctly
-  useEffect(() => {
-    console.log('Location Icons:', {
-      green: LOCATION_ICONS.green,
-      yellow: LOCATION_ICONS.yellow,
-      red: LOCATION_ICONS.red
-    });
-  }, []);
-
-  // Memoize cluster options
+  // Cluster options - always keep clustering, never show all markers
   const clusterOptions = useMemo(() => ({
     chunkedLoading: true,
-    chunkInterval: 200,
-    chunkDelay: 50,
-    maxClusterRadius: 50,
-    spiderfyOnMaxZoom: true,
+    chunkInterval: 100,
+    chunkDelay: 25,
+    maxClusterRadius: (zoom: number) => {
+      // Smaller radius at higher zoom for more precise groups
+      if (zoom <= 10) return 120;
+      if (zoom <= 13) return 80;
+      if (zoom <= 15) return 60;
+      if (zoom <= 17) return 40;
+      return 25;
+    },
+    spiderfyOnMaxZoom: false,
     showCoverageOnHover: false,
-    zoomToBoundsOnClick: true,
-    disableClusteringAtZoom: 18,
-    spiderfyDistanceMultiplier: 2,
+    zoomToBoundsOnClick: false, // We handle clicks manually
+    disableClusteringAtZoom: 25, // Never auto-expand (25 is beyond max zoom)
+    removeOutsideVisibleBounds: true,
+    animate: true,
+    animateAddingMarkers: false,
     iconCreateFunction: (cluster: L.MarkerCluster) => {
       const count = cluster.getChildCount();
-      let size = 44;
+      let size = 40;
+      let color = '#3b82f6';
       
-      if (count > 100) size = 64;
-      else if (count > 50) size = 54;
+      if (count > 1000) {
+        size = 70;
+        color = '#dc2626';
+      } else if (count > 500) {
+        size = 60;
+        color = '#ea580c';
+      } else if (count > 100) {
+        size = 50;
+        color = '#f59e0b';
+      } else if (count > 50) {
+        size = 45;
+        color = '#10b981';
+      }
       
       return L.divIcon({
-        html: `<div style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 50%,#1d4ed8 100%);color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${size/2.8}px;border:3px solid #fff;box-shadow:0 4px 12px rgba(59,130,246,0.4),0 2px 4px rgba(0,0,0,0.2)"><span>${count}</span></div>`,
-        className: 'marker-cluster',
+        html: `<div style="background:linear-gradient(135deg,${color},${color}dd);color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.floor(size/2.5)}px;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer">${count}</div>`,
+        className: 'marker-cluster-wifi',
         iconSize: L.point(size, size),
       });
     },
@@ -165,59 +162,178 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   useEffect(() => {
     if (!map || !data || data.length === 0) return;
 
-    // Create marker cluster group
-    const markerClusterGroup = L.markerClusterGroup(clusterOptions);
+    // Debounce
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-    // Batch process markers
-    const batchSize = 100;
-    let currentIndex = 0;
+    debounceTimerRef.current = setTimeout(() => {
+      // Clean up existing layers
+      if (expandedLayerRef.current) {
+        map.removeLayer(expandedLayerRef.current);
+        expandedLayerRef.current = null;
+        activeClusterRef.current = null;
+      }
+      
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current.clearLayers();
+      }
 
-    const processBatch = () => {
-      const endIndex = Math.min(currentIndex + batchSize, data.length);
-      const batch: L.Marker[] = [];
+      // Create new cluster group
+      const clusterGroup = L.markerClusterGroup(clusterOptions);
+      clusterGroupRef.current = clusterGroup;
 
-      for (let i = currentIndex; i < endIndex; i++) {
-        const wifi = data[i];
+      // Handle cluster click - expand THIS cluster only
+      clusterGroup.on('clusterclick', (event: any) => {
+        event.originalEvent.stopPropagation();
         
-        // Log first few signal values for debugging
-        if (i < 5) {
-          console.log(`WiFi ${i} - SSID: ${wifi.SSID}, Signal: ${wifi.signal}`);
+        const cluster = event.layer;
+        
+        // If clicking the same cluster, collapse it
+        if (activeClusterRef.current === cluster && expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          expandedLayerRef.current = null;
+          activeClusterRef.current = null;
+          
+          // Show the cluster icon again
+          const clusterIcon = cluster.getElement();
+          if (clusterIcon) {
+            clusterIcon.style.display = '';
+          }
+          return;
         }
         
-        // Create marker
-        const marker = L.marker([wifi.latitude, wifi.longitude], {
-          icon: createCustomIcon(wifi.signal),
-        });
-
-        // Lazy load popup
-        marker.on('click', () => {
-          if (!marker.getPopup()) {
-            marker.bindPopup(createPopupContent(wifi), { 
+        // Remove previous expanded layer and show previous cluster
+        if (expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          
+          // Show the previous cluster icon
+          if (activeClusterRef.current) {
+            const prevClusterIcon = activeClusterRef.current.getElement();
+            if (prevClusterIcon) {
+              prevClusterIcon.style.display = '';
+            }
+          }
+        }
+        
+        // Hide the clicked cluster icon
+        const clusterIcon = cluster.getElement();
+        if (clusterIcon) {
+          clusterIcon.style.display = 'none';
+        }
+        
+        // Get all markers in this cluster
+        const childMarkers = cluster.getAllChildMarkers();
+        
+        // Create new layer group for expanded markers
+        const expandedLayer = L.layerGroup();
+        expandedLayerRef.current = expandedLayer;
+        activeClusterRef.current = cluster;
+        
+        // Create individual markers at their real coordinates
+        childMarkers.forEach((marker: any) => {
+          const wifi = marker._wifiData;
+          if (wifi) {
+            const individualMarker = L.marker([wifi.latitude, wifi.longitude], {
+              icon: getIconForSignal(wifi.signal),
+              zIndexOffset: 1000, // Show on top of clusters
+            });
+            
+            // Bind popup
+            individualMarker.bindPopup(createSingleWiFiPopup(wifi), {
               maxWidth: 360,
               className: 'wifi-custom-popup',
               autoPan: true,
               autoPanPadding: [50, 50],
             });
+            
+            expandedLayer.addLayer(individualMarker);
           }
         });
+        
+        // Add expanded markers to map
+        expandedLayer.addTo(map);
+      });
 
-        batch.push(marker);
-      }
+      // Click on map (not on marker/cluster) to collapse expanded view
+      map.on('click', () => {
+        if (expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          expandedLayerRef.current = null;
+          activeClusterRef.current = null;
+        }
+      });
 
-      markerClusterGroup.addLayers(batch);
-      currentIndex = endIndex;
+      // Process markers in chunks
+      const processChunk = (startIndex: number) => {
+        const chunkSize = 500;
+        const endIndex = Math.min(startIndex + chunkSize, data.length);
+        const markers: L.Marker[] = [];
 
-      if (currentIndex < data.length) {
-        requestAnimationFrame(processBatch);
-      }
-    };
+        for (let i = startIndex; i < endIndex; i++) {
+          const wifi = data[i];
+          
+          if (!wifi || 
+              typeof wifi.latitude !== 'number' || 
+              typeof wifi.longitude !== 'number' ||
+              isNaN(wifi.latitude) || 
+              isNaN(wifi.longitude)) {
+            continue;
+          }
 
-    processBatch();
-    map.addLayer(markerClusterGroup);
+          try {
+            // Create invisible marker (will only be visible when cluster is clicked)
+            const marker = L.marker([wifi.latitude, wifi.longitude], {
+              icon: getIconForSignal(wifi.signal),
+              opacity: 0, // Hidden until expanded
+            });
 
+            // Store wifi data
+            (marker as any)._wifiData = wifi;
+
+            markers.push(marker);
+          } catch (error) {
+            console.error('Error creating marker:', error);
+          }
+        }
+
+        if (markers.length > 0) {
+          clusterGroup.addLayers(markers);
+        }
+
+        if (endIndex < data.length) {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => processChunk(endIndex), { timeout: 100 });
+          } else {
+            setTimeout(() => processChunk(endIndex), 0);
+          }
+        }
+      };
+
+      // Add cluster to map and start processing
+      map.addLayer(clusterGroup);
+      processChunk(0);
+    }, 150);
+
+    // Cleanup
     return () => {
-      map.removeLayer(markerClusterGroup);
-      markerClusterGroup.clearLayers();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      map.off('click');
+
+      if (expandedLayerRef.current) {
+        map.removeLayer(expandedLayerRef.current);
+        expandedLayerRef.current = null;
+      }
+
+      if (clusterGroupRef.current && map.hasLayer(clusterGroupRef.current)) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current.clearLayers();
+        clusterGroupRef.current = null;
+      }
     };
   }, [map, data, clusterOptions]);
 
