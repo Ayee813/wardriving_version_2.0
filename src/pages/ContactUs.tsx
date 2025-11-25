@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import React from "react";
 
 export default function ContactPage() {
   const [open, setOpen] = useState(false);
@@ -21,12 +22,13 @@ export default function ContactPage() {
         {/* Google Map */}
         <div className="w-full lg:w-1/2 drop-shadow-md">
           <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3492.569935722442!2d102.6263377!3d17.9391316!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x312376feff7b8c59%3A0x24e4b984d4e2b573!2zMTfCsDU2JzIwLjkiTiAxMDLCsDM3JzMzLjEiRQ!5e0!3m2!1sth!2sla!4v1732185040000!5m2!1sth!2sla"
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3492.569935722442!2d102.62618910254308!3d17.939147743791402!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMTfCsDU2JzIwLjkiTiAxMDLCsDM3JzM0LjMiRQ!5e0!3m2!1sen!2sla!4v1732185040000!5m2!1sen!2sla"
             width="100%"
             height="400"
             style={{ border: 0, borderRadius: "20px" }}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
+            title="Google Maps Location"
           />
         </div>
 
@@ -36,7 +38,9 @@ export default function ContactPage() {
           <div className="bg-primary text-white p-6 rounded-2xl shadow-xl flex items-center justify-between hover:scale-[1.02] transition">
             <div>
               <h3 className="font-semibold text-lg">Location</h3>
-              <p className="text-sm opacity-90">The Computer Engineering and IT Department</p>
+              <p className="text-sm opacity-90">
+                The Computer Engineering and IT Department
+              </p>
             </div>
             <div className="text-2xl opacity-80">📍</div>
           </div>
@@ -45,7 +49,9 @@ export default function ContactPage() {
           <div className="bg-primary text-white p-6 rounded-2xl shadow-xl flex items-center justify-between hover:scale-[1.02] transition">
             <div>
               <h3 className="font-semibold text-lg">Email</h3>
-              <p className="text-sm opacity-90">cybersecurityceit2023@gmail.com</p>
+              <p className="text-sm opacity-90">
+                cybersecurityceit2023@gmail.com
+              </p>
             </div>
             <div className="text-2xl opacity-80">✉️</div>
           </div>
@@ -149,7 +155,7 @@ export default function ContactPage() {
 
               <button
                 type="submit"
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-semibold shadow-lg hover:opacity-95 transition"
+                className="w-full py-3 rounded-xl bg-primary text-white font-semibold shadow-lg hover:opacity-95 transition"
               >
                 Submit
               </button>
