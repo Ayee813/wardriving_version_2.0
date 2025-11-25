@@ -1,3 +1,4 @@
+src/hooks/use-mobile.ts
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
@@ -17,13 +18,16 @@ export function useIsMobile() {
 
   return !!isMobile
 }
+src/lib/utils.ts
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+src/vite-env.d.ts
 /// <reference types="vite/client" />
+src/main.tsx
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
@@ -90,7 +94,8 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </Layout>
     </BrowserRouter>
   </React.StrictMode>
-);import { Outlet } from "react-router-dom";
+);src/layouts/admin/AdminLayout.tsx
+import { Outlet } from "react-router-dom";
 
 export default function AdminLayout() {
   return (
@@ -101,7 +106,8 @@ export default function AdminLayout() {
       </main>
     </div>
   );
-}import React from "react";
+}src/layouts/Layout.tsx
+import React from "react";
 import { useLocation } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 
@@ -118,6 +124,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </>
   );
 }
+src/layouts/map_layout/MapNav.tsx
 import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -146,6 +153,7 @@ export default function MapNav() {
     </div>
   );
 }
+src/layouts/map_layout/MapAside.tsx
 import { useState } from "react";
 import SearchableSelect from "@/components/map/SearchableSelect";
 
@@ -228,6 +236,7 @@ export default function MapAside({ isOpen, onToggle }: MapAsideProps) {
     </div>
   );
 }
+src/context/WiFiDataContext.tsx
 // src/context/WiFiDataContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { WiFiData } from '@/type/wifi';
@@ -288,13 +297,15 @@ export const WiFiDataProvider: React.FC<WiFiDataProviderProps> = ({ children }) 
       {children}
     </WiFiDataContext.Provider>
   );
-};import MapPage from "./pages/MapPage";
+};src/App.tsx
+import MapPage from "./pages/MapPage";
 
 function App() {
   return <MapPage />;
 }
 
 export default App;
+src/pages/LoginPage.tsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -330,12 +341,14 @@ export default function LoginPage() {
     </div>
   );
 }
+src/pages/ContactUs.tsx
 
 export default function ContactUs() {
   return (
     <div className="">ContactUs</div>
   )
 }
+src/pages/MapPage.tsx
 import React, { useState } from "react";
 import MapAside from "@/layouts/map_layout/MapAside";
 import MapNav from "@/layouts/map_layout/MapNav";
@@ -387,6 +400,7 @@ export default function MapPage() {
     </div>
   );
 }
+src/pages/admin/AdminMapPage.tsx
 import React, { useState } from 'react'
 import MapComponent from '@/components/MapComponent'
 import { LocationPosition } from '@/utils/locationUtils'
@@ -416,13 +430,15 @@ export default function AdminMapPage() {
       />
     </div>
   )
-}import React from 'react'
+}src/pages/admin/MessagingPage.tsx
+import React from 'react'
 
 export default function MessagingPage() {
   return (
     <div>MessagingPage</div>
   )
 }
+src/pages/admin/AdminDashBoard.tsx
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -468,6 +484,7 @@ export default function AdminDashBoard() {
     </SidebarProvider>
   );
 }
+src/pages/admin/AdminAnalysisPage.tsx
 import React from 'react'
 import AllChartContainer from '@/components/analysis/AllChartContainer'
 
@@ -479,6 +496,7 @@ export default function AdminAnalysisPage() {
     </div>
   )
 }
+src/pages/admin/AdminUploadPage.tsx
 import React, { useState } from "react";
 
 import MapComponent from "@/components/MapComponent";
@@ -671,6 +689,7 @@ export default function AdminUploadPage() {
     </div>
   );
 }
+src/pages/AnalysisPage.tsx
 import { Card } from "@/components/ui/card";
 import AllChartContainer from "@/components/analysis/AllChartContainer";
 
@@ -691,10 +710,15 @@ export default function AnalysisPage() {
     </div>
   );
 }
+src/pages/AboutUsPage.tsx
 import { useState, useEffect } from "react";
 import "./AboutUsPage.css";
 import Loading from "@/components/Loading/Loading";
-import { Divide, TurkishLira } from "lucide-react"; // optional
+import Cybergroup from "@/assets/images/cybergroup.jpg";
+import test from "@/assets/images/test.jpg";
+import test3 from "@/assets/images/test3.jpg";
+import test4 from "@/assets/images/test4.jpg";
+
 
 export default function AboutUsPage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -704,28 +728,82 @@ export default function AboutUsPage() {
     const timer = setTimeout(() => {
       setIsLoading(false);
     }, delay);
-
-    // Cleanup when component unmounts
     return () => clearTimeout(timer);
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2 relative">
+    <div className="h-screen">
       {isLoading ? (
-        <Loading />
-      ) : (
-        <div>
-          <h1 className="text-4xl font-bold">CEIT CYBER SECURITY</h1>
-          <p className="mt-4 text-lg">
-            We are dedicated to providing the best service possible.
-          </p>
+        <div className="flex justify-center items-center h-full">
+          <Loading />
         </div>
+      ) : (
+        <>
+          <div className="relative w-full h-[865px]">
+            <img
+              src={Cybergroup}
+              alt="Cyber Group"
+              className="object-cover w-full h-full"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-blue-400/10 to-blue-500/40"></div>
+            <div className="absolute inset-0 flex justify-center items-center flex-col z-10">
+              <h1 className="text-white text-6xl font-bold">
+                CEIT CYBER SECURITY
+              </h1>
+              <p className="text-white font-bold">
+                We are dedicated to providing the best service possible.
+              </p>
+            </div>
+          </div>
+         {/* About section */}
+<section className="py-20 bg-white">
+  {/* block 1 */}
+  <div className="flex flex-col md:flex-row items-center justify-center gap-10 px-10 mb-20">
+    <img src={test} alt="img" className="object-cover h-80 w-80 rounded-2xl shadow-lg" />
+    <div className="max-w-lg">
+      <h3 className="text-green-400 text-2xl font-semibold">About Us</h3>
+      <h2 className="text-5xl font-bold mt-2 mb-6">Cyber Group</h2>
+      <p className="text-gray-600 text-lg leading-relaxed">
+        Every system has a key, we just know where to find it. <br />
+        Not all heroes wear capes — some wear hoodies.
+      </p>
+    </div>
+  </div>
+
+  {/* block 2 (reverse layout) */}
+  <div className="flex flex-col md:flex-row-reverse items-center justify-center gap-10 px-10 mb-20">
+    <img src={test3} alt="img" className="object-cover h-80 w-80 rounded-2xl shadow-lg" />
+    <div className="max-w-lg text-right md:text-left">
+      <h3 className="text-green-400 text-2xl font-semibold">Our Mission</h3>
+      <h2 className="text-5xl font-bold mt-2 mb-6">Security & Growth</h2>
+      <p className="text-gray-600 text-lg leading-relaxed">
+        We build a safer digital world through innovation, collaboration, and continuous learning.
+      </p>
+    </div>
+  </div>
+
+  {/* block 3 */}
+  <div className="flex flex-col md:flex-row items-center justify-center gap-10 px-10">
+    <img src={test4} alt="img" className="object-cover h-80 w-80 rounded-2xl shadow-lg" />
+    <div className="max-w-lg">
+      <h3 className="text-green-400 text-2xl font-semibold">Our Vision</h3>
+      <h2 className="text-5xl font-bold mt-2 mb-6">Empower the Future</h2>
+      <p className="text-gray-600 text-lg leading-relaxed">
+        Empowering students and professionals to lead in the field of cybersecurity through knowledge and teamwork.
+      </p>
+    </div>
+  </div>
+</section>
+
+        </>
       )}
     </div>
   );
 }
+src/constants/location_icon.ts
 // src/constants/location_icon.ts
 
+// Import the images directly - Vite will handle the paths
 import greenIcon from "@/assets/location/location_green-n35MNbKB.png";
 import redIcon from "@/assets/location/location_red-BbHayoXQ.png";
 import yellowIcon from "@/assets/location/location_yellow-D2Y_2qFi.png";
@@ -734,7 +812,10 @@ export const LOCATION_ICONS = {
   green: greenIcon,
   red: redIcon,
   yellow: yellowIcon,
-};
+} as const;
+
+// Export type for better TypeScript support
+export type LocationIconType = keyof typeof LOCATION_ICONS;src/components/NavBar.tsx
 import { Link } from "react-router-dom";
 export default function NavBar() {
   return (
@@ -767,6 +848,7 @@ export default function NavBar() {
     </>
   );
 }
+src/components/analysis/ChannelChart.tsx
 "use client";
 
 import * as React from "react";
@@ -901,7 +983,8 @@ export function ChannelChart() {
       </CardContent>
     </Card>
   );
-}"use client";
+}src/components/analysis/AuthenticationChart.tsx
+"use client";
 
 import * as React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
@@ -1047,6 +1130,7 @@ export function AuthenticationMethodsChart() {
     </Card>
   );
 }
+src/components/analysis/EncryptionTypeChar.tsx
 "use client"
 
 import { TrendingUp } from "lucide-react"
@@ -1140,7 +1224,8 @@ export function EncryptionTypeChart() {
       </CardFooter>
     </Card>
   )
-}"use client";
+}src/components/analysis/DeviceTypeChart.tsx
+"use client";
 
 import { TrendingUp } from "lucide-react";
 import { LabelList, Pie, PieChart } from "recharts";
@@ -1237,6 +1322,7 @@ export function DeviceTypeChart() {
     </Card>
   );
 }
+src/components/analysis/SignalStrengthChart.tsx
 "use client";
 
 import * as React from "react";
@@ -1344,7 +1430,8 @@ export function SignalStrengthChart() {
       </CardContent>
     </Card>
   );
-}"use client"
+}src/components/analysis/RadioTypesChart.tsx
+"use client"
 
 import * as React from "react"
 import { Label, Pie, PieChart, Sector } from "recharts"
@@ -1460,7 +1547,8 @@ export function RadioTypesChart() {
       </CardContent>
     </Card>
   )
-}import React from 'react'
+}src/components/analysis/AllChartContainer.tsx
+import React from 'react'
 import { DeviceTypeChart } from './DeviceTypeChart'
 import { FrequencyChart } from './FrequencyChart'
 import { EncryptionTypeChart } from './EncryptionTypeChar'
@@ -1482,6 +1570,7 @@ export default function AllChartContainer() {
       </div>
   )
 }
+src/components/analysis/FrequencyChart.tsx
 "use client"
 
 import { TrendingUp } from "lucide-react"
@@ -1599,7 +1688,8 @@ export function FrequencyChart() {
       </CardFooter>
     </Card>
   )
-}import React from "react";
+}src/components/Loading/Loading.tsx
+import React from "react";
 import "./Loading.css";
 
 export default function Loading() {
@@ -1610,6 +1700,7 @@ export default function Loading() {
     </div>
   );
 }
+src/components/ui/avatar.tsx
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
 
@@ -1661,6 +1752,7 @@ function AvatarFallback({
 }
 
 export { Avatar, AvatarImage, AvatarFallback }
+src/components/ui/sheet.tsx
 import * as React from "react"
 import * as SheetPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
@@ -1798,6 +1890,7 @@ export {
   SheetTitle,
   SheetDescription,
 }
+src/components/ui/sidebar.tsx
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, VariantProps } from "class-variance-authority"
@@ -2522,6 +2615,7 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+src/components/ui/skeleton.tsx
 import { cn } from "@/lib/utils"
 
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
@@ -2535,6 +2629,7 @@ function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 export { Skeleton }
+src/components/ui/breadcrumb.tsx
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { ChevronRight, MoreHorizontal } from "lucide-react"
@@ -2644,6 +2739,7 @@ export {
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
 }
+src/components/ui/collapsible.tsx
 import * as CollapsiblePrimitive from "@radix-ui/react-collapsible"
 
 function Collapsible({
@@ -2675,6 +2771,7 @@ function CollapsibleContent({
 }
 
 export { Collapsible, CollapsibleTrigger, CollapsibleContent }
+src/components/ui/dropdown-menu.tsx
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { CheckIcon, ChevronRightIcon, CircleIcon } from "lucide-react"
@@ -2930,6 +3027,7 @@ export {
   DropdownMenuSubTrigger,
   DropdownMenuSubContent,
 }
+src/components/ui/tooltip.tsx
 "use client"
 
 import * as React from "react"
@@ -2991,6 +3089,7 @@ function TooltipContent({
 }
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider }
+src/components/ui/button.tsx
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -3050,6 +3149,7 @@ function Button({
 }
 
 export { Button, buttonVariants }
+src/components/ui/separator.tsx
 "use client"
 
 import * as React from "react"
@@ -3078,6 +3178,7 @@ function Separator({
 }
 
 export { Separator }
+src/components/ui/chart.tsx
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
@@ -3429,6 +3530,7 @@ export {
   ChartLegendContent,
   ChartStyle,
 }
+src/components/ui/select.tsx
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react"
@@ -3612,6 +3714,7 @@ export {
   SelectTrigger,
   SelectValue,
 }
+src/components/ui/input.tsx
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -3633,6 +3736,7 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
 }
 
 export { Input }
+src/components/ui/card.tsx
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
@@ -3725,6 +3829,7 @@ export {
   CardDescription,
   CardContent,
 }
+src/components/admin/app-sidebar.tsx
 "use client";
 
 import * as React from "react";
@@ -3846,6 +3951,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     </Sidebar>
   );
 }
+src/components/admin/nav-main.tsx
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
@@ -3928,7 +4034,8 @@ export function NavMain({
       </SidebarMenu>
     </SidebarGroup>
   )
-}"use client"
+}src/components/admin/nav-projects.tsx
+"use client"
 
 import {
   type LucideIcon,
@@ -3974,7 +4081,8 @@ export function NavProjects({
       </SidebarMenu>
     </SidebarGroup>
   )
-}"use client"
+}src/components/admin/team-switcher.tsx
+"use client"
 
 import * as React from "react"
 import { ChevronsUpDown, Plus } from "lucide-react"
@@ -4065,6 +4173,7 @@ export function TeamSwitcher({
     </SidebarMenu>
   )
 }
+src/components/admin/nav-user.tsx
 "use client";
 
 import {
@@ -4180,6 +4289,7 @@ export function NavUser({
     </SidebarMenu>
   );
 }
+src/components/map/LocationButton.tsx
 import { useState } from "react";
 
 interface LocationButtonProps {
@@ -4257,7 +4367,8 @@ export default function LocationButton({
     </div>
   );
 }
-import React, { useEffect, useMemo } from 'react';
+src/components/map/WiFiMarkers.tsx
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.markercluster';
@@ -4270,38 +4381,39 @@ interface WiFiMarkersProps {
   data: WiFiData[];
 }
 
-// Cache for custom icons to avoid recreating them
-const iconCache = new Map<string, L.Icon>();
-
-const getLocationIcon = (signal: number): string => {
-  if (signal >= -50) return LOCATION_ICONS.green;
-  else if (signal >= -70) return LOCATION_ICONS.yellow;
-  else return LOCATION_ICONS.red;
+// Shared icon instances
+const iconInstances = {
+  green: null as L.Icon | null,
+  yellow: null as L.Icon | null,
+  red: null as L.Icon | null,
 };
 
-const createCustomIcon = (signal: number): L.Icon => {
-  const iconUrl = getLocationIcon(signal);
-  const cacheKey = `${iconUrl}-${signal}`;
-  
-  if (iconCache.has(cacheKey)) {
-    return iconCache.get(cacheKey)!;
+const getOrCreateIcon = (color: 'green' | 'yellow' | 'red'): L.Icon => {
+  if (!iconInstances[color]) {
+    iconInstances[color] = L.icon({
+      iconUrl: LOCATION_ICONS[color],
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32],
+      className: 'wifi-location-marker',
+    });
   }
-  
-  const icon = L.icon({
-    iconUrl: iconUrl,
-    iconSize: [32, 32],
-    iconAnchor: [16, 32],
-    popupAnchor: [0, -32],
-    shadowUrl: undefined,
-    className: 'wifi-location-marker',
-  });
-  
-  iconCache.set(cacheKey, icon);
-  return icon;
+  return iconInstances[color]!;
 };
 
-// Optimized popup content generator - only creates HTML when needed
-const createPopupContent = (wifi: WiFiData): string => {
+const getIconForSignal = (signal: number): L.Icon => {
+  const signalValue = typeof signal === 'number' ? signal : parseFloat(signal);
+  
+  if (isNaN(signalValue) || signalValue < -70) {
+    return getOrCreateIcon('red');
+  } else if (signalValue >= -50) {
+    return getOrCreateIcon('green');
+  } else {
+    return getOrCreateIcon('yellow');
+  }
+};
+
+const createSingleWiFiPopup = (wifi: WiFiData): string => {
   const security = getSecurityLevel(wifi.AUTHENTICATION);
   const signalStrength = getSignalStrength(wifi.signal);
   const signalColor = getSignalColor(wifi.signal);
@@ -4365,28 +4477,53 @@ const createPopupContent = (wifi: WiFiData): string => {
 
 export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   const map = useMap();
+  const clusterGroupRef = useRef<L.MarkerClusterGroup | null>(null);
+  const expandedLayerRef = useRef<L.LayerGroup | null>(null);
+  const activeClusterRef = useRef<L.MarkerCluster | null>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Memoize cluster options to prevent recreating on each render
+  // Cluster options - always keep clustering, never show all markers
   const clusterOptions = useMemo(() => ({
     chunkedLoading: true,
-    chunkInterval: 200, // Process markers in chunks
-    chunkDelay: 50, // Delay between chunks
-    maxClusterRadius: 50,
-    spiderfyOnMaxZoom: true,
+    chunkInterval: 100,
+    chunkDelay: 25,
+    maxClusterRadius: (zoom: number) => {
+      // Smaller radius at higher zoom for more precise groups
+      if (zoom <= 10) return 120;
+      if (zoom <= 13) return 80;
+      if (zoom <= 15) return 60;
+      if (zoom <= 17) return 40;
+      return 25;
+    },
+    spiderfyOnMaxZoom: false,
     showCoverageOnHover: false,
-    zoomToBoundsOnClick: true,
-    disableClusteringAtZoom: 18,
-    spiderfyDistanceMultiplier: 2,
+    zoomToBoundsOnClick: false, // We handle clicks manually
+    disableClusteringAtZoom: 25, // Never auto-expand (25 is beyond max zoom)
+    removeOutsideVisibleBounds: true,
+    animate: true,
+    animateAddingMarkers: false,
     iconCreateFunction: (cluster: L.MarkerCluster) => {
       const count = cluster.getChildCount();
-      let size = 44;
+      let size = 40;
+      let color = '#3b82f6';
       
-      if (count > 100) size = 64;
-      else if (count > 50) size = 54;
+      if (count > 1000) {
+        size = 70;
+        color = '#dc2626';
+      } else if (count > 500) {
+        size = 60;
+        color = '#ea580c';
+      } else if (count > 100) {
+        size = 50;
+        color = '#f59e0b';
+      } else if (count > 50) {
+        size = 45;
+        color = '#10b981';
+      }
       
       return L.divIcon({
-        html: `<div style="background:linear-gradient(135deg,#3b82f6 0%,#2563eb 50%,#1d4ed8 100%);color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${size/2.8}px;border:3px solid #fff;box-shadow:0 4px 12px rgba(59,130,246,0.4),0 2px 4px rgba(0,0,0,0.2)"><span>${count}</span></div>`,
-        className: 'marker-cluster',
+        html: `<div style="background:linear-gradient(135deg,${color},${color}dd);color:#fff;border-radius:50%;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:${Math.floor(size/2.5)}px;border:3px solid #fff;box-shadow:0 3px 10px rgba(0,0,0,0.3);cursor:pointer">${count}</div>`,
+        className: 'marker-cluster-wifi',
         iconSize: L.point(size, size),
       });
     },
@@ -4395,66 +4532,184 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
   useEffect(() => {
     if (!map || !data || data.length === 0) return;
 
-    // Create marker cluster group with optimized settings
-    const markerClusterGroup = L.markerClusterGroup(clusterOptions);
+    // Debounce
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
 
-    // Batch process markers for better performance
-    const batchSize = 100;
-    let currentIndex = 0;
+    debounceTimerRef.current = setTimeout(() => {
+      // Clean up existing layers
+      if (expandedLayerRef.current) {
+        map.removeLayer(expandedLayerRef.current);
+        expandedLayerRef.current = null;
+        activeClusterRef.current = null;
+      }
+      
+      if (clusterGroupRef.current) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current.clearLayers();
+      }
 
-    const processBatch = () => {
-      const endIndex = Math.min(currentIndex + batchSize, data.length);
-      const batch: L.Marker[] = [];
+      // Create new cluster group
+      const clusterGroup = L.markerClusterGroup(clusterOptions);
+      clusterGroupRef.current = clusterGroup;
 
-      for (let i = currentIndex; i < endIndex; i++) {
-        const wifi = data[i];
+      // Handle cluster click - expand THIS cluster only
+      clusterGroup.on('clusterclick', (event: any) => {
+        event.originalEvent.stopPropagation();
         
-        // Create marker
-        const marker = L.marker([wifi.latitude, wifi.longitude], {
-          icon: createCustomIcon(wifi.signal),
-        });
-
-        // Lazy load popup - only create content when popup is opened
-        marker.on('click', () => {
-          if (!marker.getPopup()) {
-            marker.bindPopup(createPopupContent(wifi), { 
+        const cluster = event.layer;
+        
+        // If clicking the same cluster, collapse it
+        if (activeClusterRef.current === cluster && expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          expandedLayerRef.current = null;
+          activeClusterRef.current = null;
+          
+          // Show the cluster icon again
+          const clusterIcon = cluster.getElement();
+          if (clusterIcon) {
+            clusterIcon.style.display = '';
+          }
+          return;
+        }
+        
+        // Remove previous expanded layer and show previous cluster
+        if (expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          
+          // Show the previous cluster icon
+          if (activeClusterRef.current) {
+            const prevClusterIcon = activeClusterRef.current.getElement();
+            if (prevClusterIcon) {
+              prevClusterIcon.style.display = '';
+            }
+          }
+        }
+        
+        // Hide the clicked cluster icon
+        const clusterIcon = cluster.getElement();
+        if (clusterIcon) {
+          clusterIcon.style.display = 'none';
+        }
+        
+        // Get all markers in this cluster
+        const childMarkers = cluster.getAllChildMarkers();
+        
+        // Create new layer group for expanded markers
+        const expandedLayer = L.layerGroup();
+        expandedLayerRef.current = expandedLayer;
+        activeClusterRef.current = cluster;
+        
+        // Create individual markers at their real coordinates
+        childMarkers.forEach((marker: any) => {
+          const wifi = marker._wifiData;
+          if (wifi) {
+            const individualMarker = L.marker([wifi.latitude, wifi.longitude], {
+              icon: getIconForSignal(wifi.signal),
+              zIndexOffset: 1000, // Show on top of clusters
+            });
+            
+            // Bind popup
+            individualMarker.bindPopup(createSingleWiFiPopup(wifi), {
               maxWidth: 360,
               className: 'wifi-custom-popup',
               autoPan: true,
               autoPanPadding: [50, 50],
             });
+            
+            expandedLayer.addLayer(individualMarker);
           }
         });
+        
+        // Add expanded markers to map
+        expandedLayer.addTo(map);
+      });
 
-        batch.push(marker);
-      }
+      // Click on map (not on marker/cluster) to collapse expanded view
+      map.on('click', () => {
+        if (expandedLayerRef.current) {
+          map.removeLayer(expandedLayerRef.current);
+          expandedLayerRef.current = null;
+          activeClusterRef.current = null;
+        }
+      });
 
-      // Add batch to cluster group
-      markerClusterGroup.addLayers(batch);
+      // Process markers in chunks
+      const processChunk = (startIndex: number) => {
+        const chunkSize = 500;
+        const endIndex = Math.min(startIndex + chunkSize, data.length);
+        const markers: L.Marker[] = [];
 
-      currentIndex = endIndex;
+        for (let i = startIndex; i < endIndex; i++) {
+          const wifi = data[i];
+          
+          if (!wifi || 
+              typeof wifi.latitude !== 'number' || 
+              typeof wifi.longitude !== 'number' ||
+              isNaN(wifi.latitude) || 
+              isNaN(wifi.longitude)) {
+            continue;
+          }
 
-      // Continue processing if there are more markers
-      if (currentIndex < data.length) {
-        requestAnimationFrame(processBatch);
-      }
-    };
+          try {
+            // Create invisible marker (will only be visible when cluster is clicked)
+            const marker = L.marker([wifi.latitude, wifi.longitude], {
+              icon: getIconForSignal(wifi.signal),
+              opacity: 0, // Hidden until expanded
+            });
 
-    // Start processing batches
-    processBatch();
+            // Store wifi data
+            (marker as any)._wifiData = wifi;
 
-    // Add cluster group to map
-    map.addLayer(markerClusterGroup);
+            markers.push(marker);
+          } catch (error) {
+            console.error('Error creating marker:', error);
+          }
+        }
 
-    // Cleanup function
+        if (markers.length > 0) {
+          clusterGroup.addLayers(markers);
+        }
+
+        if (endIndex < data.length) {
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(() => processChunk(endIndex), { timeout: 100 });
+          } else {
+            setTimeout(() => processChunk(endIndex), 0);
+          }
+        }
+      };
+
+      // Add cluster to map and start processing
+      map.addLayer(clusterGroup);
+      processChunk(0);
+    }, 150);
+
+    // Cleanup
     return () => {
-      map.removeLayer(markerClusterGroup);
-      markerClusterGroup.clearLayers();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+
+      map.off('click');
+
+      if (expandedLayerRef.current) {
+        map.removeLayer(expandedLayerRef.current);
+        expandedLayerRef.current = null;
+      }
+
+      if (clusterGroupRef.current && map.hasLayer(clusterGroupRef.current)) {
+        map.removeLayer(clusterGroupRef.current);
+        clusterGroupRef.current.clearLayers();
+        clusterGroupRef.current = null;
+      }
     };
   }, [map, data, clusterOptions]);
 
   return null;
-};import { useState, useRef, useEffect } from "react";
+};src/components/map/SearchableSelect.tsx
+import { useState, useRef, useEffect } from "react";
 
 interface Option {
   value: string;
@@ -4603,7 +4858,8 @@ export default function SearchableSelect({
       )}
     </div>
   );
-}import React from "react";
+}src/components/PrivateRoute.tsx
+import React from "react";
 import { Navigate } from "react-router-dom";
 
 interface PrivateRouteProps {
@@ -4628,6 +4884,7 @@ const PrivateRoute: React.FC<PrivateRouteProps> = ({ children, requiredRole }) =
 };
 
 export default PrivateRoute;
+src/components/MapComponent.tsx
 import React, { useRef, useEffect, useState } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import L from "leaflet";
@@ -4848,7 +5105,8 @@ export default function MapComponent({
       )}
     </div>
   );
-}export interface WiFiData {
+}src/type/wifi.ts
+export interface WiFiData {
   SSID: string;
   BSSID: string;
   MANUFACTURER: string;
@@ -4905,6 +5163,7 @@ export const getSecurityLevel = (auth: string): { level: string; color: string }
   if (auth.includes('WPA2')) return { level: 'Medium', color: '#eab308' };
   return { level: 'Low', color: '#f97316' };
 };
+src/utils/locationUtils.ts
 // src/utils/locationUtils.ts
 
 export interface LocationPosition {
@@ -4953,7 +5212,8 @@ export const getCurrentPosition = async (): Promise<LocationPosition> => {
       }
     );
   });
-};import Papa from 'papaparse';
+};src/utils/csvParser.ts
+import Papa from 'papaparse';
 // import { WiFiData } from '@/types/wifi';
 import { WiFiData } from '@/type/wifi';
 

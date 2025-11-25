@@ -1,6 +1,7 @@
+//csvParser.ts
+
 import Papa from 'papaparse';
-// import { WiFiData } from '@/types/wifi';
-import { WiFiData } from '@/type/wifi';
+import type { WiFiData } from '@/type/wifi';
 
 export const parseWiFiCSV = async (file: File): Promise<WiFiData[]> => {
   return new Promise((resolve, reject) => {
@@ -13,16 +14,16 @@ export const parseWiFiCSV = async (file: File): Promise<WiFiData[]> => {
         const data = results.data as WiFiData[];
         const validData = data.filter(
           (row) =>
-            row.latitude &&
-            row.longitude &&
-            !isNaN(row.latitude) &&
-            !isNaN(row.longitude) &&
-            row.latitude !== 0 &&
-            row.longitude !== 0
+            (row.latitude || row.LATITUDE) &&
+            (row.longitude || row.LONGITUDE) &&
+            !isNaN(row.latitude || row.LATITUDE) &&
+            !isNaN(row.longitude || row.LONGITUDE) &&
+            (row.latitude || row.LATITUDE) !== 0 &&
+            (row.longitude || row.LONGITUDE) !== 0
         );
         resolve(validData);
       },
-      error: (error) => {
+      error: (error: any) => {
         reject(error);
       },
     });
@@ -43,12 +44,12 @@ export const loadCSVFromPath = async (path: string): Promise<WiFiData[]> => {
         const data = results.data as WiFiData[];
         const validData = data.filter(
           (row) =>
-            row.latitude &&
-            row.longitude &&
-            !isNaN(row.latitude) &&
-            !isNaN(row.longitude) &&
-            row.latitude !== 0 &&
-            row.longitude !== 0
+            (row.latitude || row.LATITUDE) &&
+            (row.longitude || row.LONGITUDE) &&
+            !isNaN(row.latitude || row.LATITUDE) &&
+            !isNaN(row.longitude || row.LONGITUDE) &&
+            (row.latitude || row.LATITUDE) !== 0 &&
+            (row.longitude || row.LONGITUDE) !== 0
         );
         resolve(validData);
       },

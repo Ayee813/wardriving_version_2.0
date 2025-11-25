@@ -1,61 +1,54 @@
-"use client";
 
-import * as React from "react";
+import React from "react";
+
+// ========================================
+// src/components/analysis/SignalStrengthChart.tsx
+// ========================================
+
+import {
+  Card as CardSig,
+  CardContent as CardContentSig,
+  CardHeader as CardHeaderSig,
+  CardTitle as CardTitleSig,
+} from "@/components/ui/card";
+import type {
+  ChartConfig as ChartConfigSig,
+} from "@/components/ui/chart";
+import {
+  ChartContainer as ChartContainerSig,
+  ChartTooltip as ChartTooltipSig,
+  ChartTooltipContent as ChartTooltipContentSig,
+} from "@/components/ui/chart";
+import { useWiFiData as useWiFiDataSig } from "@/context/WiFiDataContext";
+import { getSignalStrengthHistogram } from "@/utils/analysisUtils";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-
-export const description = "A signal strength distribution histogram";
-
-// Signal strength histogram data - bins with their frequencies
-const chartData = [
-  { bin: "20-25", count: 12 },
-  { bin: "25-30", count: 28 },
-  { bin: "30-35", count: 45 },
-  { bin: "35-40", count: 67 },
-  { bin: "40-45", count: 89 },
-  { bin: "45-50", count: 156 },
-  { bin: "50-55", count: 203 },
-  { bin: "55-60", count: 187 },
-  { bin: "60-65", count: 134 },
-  { bin: "65-70", count: 98 },
-  { bin: "70-75", count: 76 },
-  { bin: "75-80", count: 54 },
-  { bin: "80-85", count: 32 },
-  { bin: "85-90", count: 18 },
-  { bin: "90-95", count: 8 },
-];
-
-const chartConfig = {
+const signalChartConfig = {
   count: {
     label: "Count",
     color: "var(--chart-1)",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfigSig;
 
 export function SignalStrengthChart() {
+  const { wifiData, loading } = useWiFiDataSig()
+  const chartData = React.useMemo(() => {
+    if (loading || !wifiData.length) return []
+    return getSignalStrengthHistogram(wifiData)
+  }, [wifiData, loading])
+
+  if (loading) return <CardSig className="py-0"><CardContentSig className="p-6">Loading...</CardContentSig></CardSig>
+
   return (
-    <Card className="py-0">
-      <CardHeader className="flex flex-col items-stretch border-b px-6 py-4">
+    <CardSig className="py-0">
+      <CardHeaderSig className="flex flex-col items-stretch border-b px-6 py-4">
         <div className="flex flex-1 flex-col justify-center gap-1">
-          <CardTitle>Signal Strength Distribution</CardTitle>
+          <CardTitleSig>Signal Strength Distribution</CardTitleSig>
         </div>
-      </CardHeader>
-      <CardContent className="px-2 sm:p-6">
-        <ChartContainer
-          config={chartConfig}
+      </CardHeaderSig>
+      <CardContentSig className="px-2 sm:p-6">
+        <ChartContainerSig
+          config={signalChartConfig}
           className="aspect-auto h-[400px] w-full"
         >
           <BarChart
@@ -84,25 +77,25 @@ export function SignalStrengthChart() {
               stroke="#666"
               fontSize={12}
             />
-            <ChartTooltip
+            <ChartTooltipSig
               content={
-                <ChartTooltipContent
+                <ChartTooltipContentSig
                   className="w-[150px]"
                   labelFormatter={(value) => `Signal: ${value} dBm`}
-                  formatter={(value, name) => [value, "Networks"]}
+                  formatter={(value) => [value, "Networks"]}
                 />
               }
             />
-            <Bar 
-              dataKey="count" 
+            <Bar
+              dataKey="count"
               fill="var(--color-count)"
               stroke="var(--color-count)"
               strokeWidth={1}
               radius={0}
             />
           </BarChart>
-        </ChartContainer>
-      </CardContent>
-    </Card>
-  );
+        </ChartContainerSig>
+      </CardContentSig>
+    </CardSig>
+  )
 }

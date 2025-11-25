@@ -1,26 +1,26 @@
+// src/components/analysis/FrequencyChart.tsx
 "use client"
 
-import { TrendingUp } from "lucide-react"
+import * as React from "react"
 import { Label, PolarRadiusAxis, RadialBar, RadialBarChart } from "recharts"
 
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import {
+import type {
   ChartConfig,
+} from "@/components/ui/chart";
+import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/ui/chart"
-
-export const description = "A radial chart with stacked sections"
-
-const chartData = [{ month: "january", "2.4GHz": 860, "5.0GHz": 970 }]
+} from "@/components/ui/chart";
+import { useWiFiData } from "@/context/WiFiDataContext"
+import { getFrequencyDistribution } from "@/utils/analysisUtils"
 
 const chartConfig = {
   "2.4GHz": {
@@ -34,13 +34,21 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function FrequencyChart() {
+  const { wifiData, loading } = useWiFiData()
+  const chartData = React.useMemo(() => {
+    if (loading || !wifiData.length) return [{ month: "january", "2.4GHz": 0, "5.0GHz": 0 }]
+    return getFrequencyDistribution(wifiData)
+  }, [wifiData, loading])
+
   const totalVisitors = chartData[0]["2.4GHz"] + chartData[0]["5.0GHz"]
-  const freq24Percent = ((chartData[0]["2.4GHz"] / totalVisitors) * 100).toFixed(1);
-  const freq50Percent = ((chartData[0]["5.0GHz"] / totalVisitors) * 100).toFixed(1);
+  const freq24Percent = totalVisitors > 0 ? ((chartData[0]["2.4GHz"] / totalVisitors) * 100).toFixed(1) : "0"
+  const freq50Percent = totalVisitors > 0 ? ((chartData[0]["5.0GHz"] / totalVisitors) * 100).toFixed(1) : "0"
+
+  if (loading) return <Card className="flex flex-col"><CardContent className="p-6">Loading...</CardContent></Card>
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center  pb-0 border-b">
+      <CardHeader className="items-center pb-0 border-b">
         <CardTitle>Frequency Type</CardTitle>
       </CardHeader>
       <CardContent className="flex flex-1 items-center pb-0">
@@ -116,3 +124,4 @@ export function FrequencyChart() {
     </Card>
   )
 }
+

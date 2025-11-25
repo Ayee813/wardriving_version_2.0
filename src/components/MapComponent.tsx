@@ -48,8 +48,8 @@ export default function MapComponent({
         setLoading(true);
         setError(null);
         
-        // Try to load from the assets folder - adjust path as needed
-        const data = await loadCSVFromPath('/src/assets/CSV_FILE/Chanthabuly merge all zone.csv');
+        // Try to load from the public folder
+        const data = await loadCSVFromPath('/CSV_FILE/Chanthabuly merge all zone.csv');
         
         setWifiData(data);
         console.log(`Successfully loaded ${data.length} WiFi access points`);
@@ -132,7 +132,7 @@ export default function MapComponent({
     <div className="relative h-full w-full">
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
+        <div className="absolute top-15 left-1/2 transform -translate-x-1/2 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
           <div className="flex items-center space-x-2">
             <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
             <span className="text-sm font-medium">Loading WiFi data...</span>
@@ -142,14 +142,14 @@ export default function MapComponent({
 
       {/* Error message */}
       {error && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg max-w-md">
+        <div className="absolute top-15 left-1/2 transform -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg max-w-md">
           <p className="text-sm">{error}</p>
         </div>
       )}
 
       {/* WiFi data counter */}
       {!loading && !error && wifiData.length > 0 && (
-        <div className="absolute top-4 left-4 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
+        <div className="absolute top-15 left-4 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
           <div className="text-sm">
             <span className="font-semibold">Access Points:</span> {wifiData.length}
           </div>

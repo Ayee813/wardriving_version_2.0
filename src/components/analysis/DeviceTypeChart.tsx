@@ -1,31 +1,31 @@
-"use client";
 
-import { TrendingUp } from "lucide-react";
+import React from "react";
+
+// ========================================
+// src/components/analysis/DeviceTypeChart.tsx
+// ========================================
+
 import { LabelList, Pie, PieChart } from "recharts";
 
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
+  Card as CardDev,
+  CardContent as CardContentDev,
+  CardFooter as CardFooterDev,
+  CardHeader as CardHeaderDev,
+  CardTitle as CardTitleDev,
 } from "@/components/ui/card";
-import {
-  ChartConfig,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
+import type {
+  ChartConfig as ChartConfigDev,
 } from "@/components/ui/chart";
+import {
+  ChartContainer as ChartContainerDev,
+  ChartTooltip as ChartTooltipDev,
+  ChartTooltipContent as ChartTooltipContentDev,
+} from "@/components/ui/chart";
+import { useWiFiData as useWiFiDataDev } from "@/context/WiFiDataContext";
+import { getDeviceTypeDistribution } from "@/utils/analysisUtils";
 
-export const description = "A pie chart with a label list";
-
-const chartData = [
-  { browser: "router", visitors: 435, fill: "var(--color-router)" },
-  { browser: "mobile", visitors: 290, fill: "var(--color-mobile)" },
-];
-
-const chartConfig = {
+const deviceChartConfig = {
   visitors: {
     label: "Visitors",
   },
@@ -37,34 +37,32 @@ const chartConfig = {
     label: "Mobile",
     color: "var(--chart-2)",
   },
-} satisfies ChartConfig;
+} satisfies ChartConfigDev;
 
 export function DeviceTypeChart() {
-  const totalVisitors = chartData.reduce((acc, curr) => acc + curr.visitors, 0);
-  const routerPercent = (
-    ((chartData.find((d) => d.browser === "router")?.visitors || 0) /
-      totalVisitors) *
-    100
-  ).toFixed(1);
-  const mobilePercent = (
-    ((chartData.find((d) => d.browser === "mobile")?.visitors || 0) /
-      totalVisitors) *
-    100
-  ).toFixed(1);
+  const { wifiData, loading } = useWiFiDataDev()
+  const chartData = React.useMemo(() => {
+    if (loading || !wifiData.length) return []
+    return getDeviceTypeDistribution(wifiData)
+  }, [wifiData, loading])
+
+  const totalVisitors = chartData.reduce((acc, curr) => acc + curr.visitors, 0)
+
+  if (loading) return <CardDev className="flex flex-col"><CardContentDev className="p-6">Loading...</CardContentDev></CardDev>
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="items-center pb-0 border-b">
-        <CardTitle>Device Type Distribution</CardTitle>
-      </CardHeader>
-      <CardContent className="flex-1 pb-0">
-        <ChartContainer
-          config={chartConfig}
+    <CardDev className="flex flex-col">
+      <CardHeaderDev className="items-center pb-0 border-b">
+        <CardTitleDev>Device Type Distribution</CardTitleDev>
+      </CardHeaderDev>
+      <CardContentDev className="flex-1 pb-0">
+        <ChartContainerDev
+          config={deviceChartConfig}
           className="[&_.recharts-text]:fill-background mx-auto aspect-square max-h-[250px]"
         >
           <PieChart>
-            <ChartTooltip
-              content={<ChartTooltipContent nameKey="visitors" hideLabel />}
+            <ChartTooltipDev
+              content={<ChartTooltipContentDev nameKey="visitors" hideLabel />}
             />
             <Pie data={chartData} dataKey="visitors">
               <LabelList
@@ -72,26 +70,27 @@ export function DeviceTypeChart() {
                 className="fill-background"
                 stroke="none"
                 fontSize={12}
-                formatter={(value: keyof typeof chartConfig) =>
-                  chartConfig[value]?.label
-                }
+                formatter={(value: string) => {
+                  return value.charAt(0).toUpperCase() + value.slice(1);
+                }}
               />
             </Pie>
           </PieChart>
-        </ChartContainer>
-      </CardContent>
-      <CardFooter className="flex-col gap-2 text-sm">
+        </ChartContainerDev>
+      </CardContentDev>
+      <CardFooterDev className="flex-col gap-2 text-sm">
         <div className="flex items-center justify-center gap-6 leading-none font-medium">
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-chart-1"></div>
-            Router: {routerPercent}%
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-full bg-chart-2"></div>
-            Mobile: {mobilePercent}%
-          </div>
+          {chartData.map((item, idx) => {
+            const percent = totalVisitors > 0 ? ((item.visitors / totalVisitors) * 100).toFixed(1) : "0"
+            return (
+              <div key={item.browser} className="flex items-center gap-2">
+                <div className={`w-3 h-3 rounded-full bg-chart-${idx + 1}`}></div>
+                {item.browser.charAt(0).toUpperCase() + item.browser.slice(1)}: {percent}%
+              </div>
+            )
+          })}
         </div>
-      </CardFooter>
-    </Card>
-  );
+      </CardFooterDev>
+    </CardDev>
+  )
 }
