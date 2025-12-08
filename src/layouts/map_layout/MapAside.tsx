@@ -35,20 +35,22 @@ export default function MapAside({ isOpen, onToggle }: MapAsideProps) {
 
   return (
     <div
-      className={`h-full transition-transform duration-300 ease-in-out ${
-        isOpen ? "translate-x-0" : "translate-x-full"
-      }`}
+      className={`h-full transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "translate-x-full"
+        }`}
     >
-      {/* Toggle button */}
+      {/* Toggle button - responsive positioning */}
       <button
         onClick={onToggle}
-        className={`absolute left-0 top-4 transform -translate-x-full bg-white shadow-lg rounded-l-md p-2 hover:bg-gray-50 transition-colors duration-200 z-10 cursor-pointer`}
+        className={`absolute bg-white shadow-lg p-3 hover:bg-gray-50 transition-colors duration-200 z-[1001] cursor-pointer
+          ${isOpen
+            ? "left-0 top-4 transform -translate-x-full rounded-l-md md:block"
+            : "md:left-0 md:top-4 md:transform md:-translate-x-full md:rounded-l-md bottom-4 right-4 md:bottom-auto md:right-auto rounded-full md:rounded-l-md"
+          }`}
         aria-label={isOpen ? "Close sidebar" : "Open sidebar"}
       >
         <svg
-          className={`w-5 h-5 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-5 h-5 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"

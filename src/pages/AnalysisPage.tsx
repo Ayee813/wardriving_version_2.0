@@ -6,7 +6,7 @@ export default function AnalysisPage() {
   return (
     <WiFiDataProvider>
       <div className="h-screen">
-        <h1 className="text-2xl font-bold m-4">WIFI Analysis</h1>
+        <h1 className="text-xl md:text-2xl font-bold m-4">WIFI Analysis</h1>
         <div className="p-4">
           <Card className="p-4">
             <div>

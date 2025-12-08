@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useMemo } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import LocationButton from "@/components/map/LocationButton";
-import { getCurrentPosition, LocationPosition } from "@/utils/locationUtils";
-import { WiFiData } from "@/type/wifi";
+import { getCurrentPosition, type LocationPosition } from "@/utils/locationUtils";
+import { type WiFiData } from "@/type/wifi";
 import { WiFiMarkers } from "@/components/map/WiFiMarkers";
 import { loadCSVFromPath } from "@/utils/csvParser";
 
@@ -19,6 +19,8 @@ interface MapComponentProps {
   showLocationButton?: boolean;
   locationButtonPosition?: "topleft" | "topright" | "bottomleft" | "bottomright";
   zoomControlPosition?: "topleft" | "topright" | "bottomleft" | "bottomright";
+  authFilter?: string;
+  searchQuery?: string;
 }
 
 export default function MapComponent({
@@ -31,11 +33,13 @@ export default function MapComponent({
   className = "h-full w-full",
   showLocationButton = true,
   locationButtonPosition = "bottomleft",
-  zoomControlPosition = "bottomleft"
+  zoomControlPosition = "bottomleft",
+  authFilter = "all",
+  searchQuery = ""
 }: MapComponentProps) {
   const mapRef = useRef<L.Map | null>(null);
   const userMarkerRef = useRef<L.Marker | null>(null);
-  
+
   // WiFi data state
   const [wifiData, setWifiData] = useState<WiFiData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,15 +51,39 @@ export default function MapComponent({
       try {
         setLoading(true);
         setError(null);
-        
-        // Try to load from the public folder
-        const data = await loadCSVFromPath('/CSV_FILE/Chanthabuly merge all zone.csv');
-        
-        setWifiData(data);
-        console.log(`Successfully loaded ${data.length} WiFi access points`);
+
+        // List of all CSV files to load
+        const csvFiles = [
+          '/CSV_FILE/Chanthabuly merge all zone.csv',
+          '/CSV_FILE/LPB-result.csv',
+          '/CSV_FILE/ZONE A2.csv',
+          '/CSV_FILE/result-VTE.csv',
+          '/CSV_FILE/result_FOEN.csv'
+        ];
+
+        // Load all CSV files concurrently
+        const loadPromises = csvFiles.map(async (filePath) => {
+          try {
+            const data = await loadCSVFromPath(filePath);
+            console.log(`Loaded ${data.length} access points from ${filePath.split('/').pop()}`);
+            return data;
+          } catch (err) {
+            console.error(`Failed to load ${filePath}:`, err);
+            return []; // Return empty array if file fails to load
+          }
+        });
+
+        // Wait for all files to load
+        const allData = await Promise.all(loadPromises);
+
+        // Combine all data into a single array
+        const combinedData = allData.flat();
+
+        setWifiData(combinedData);
+        console.log(`Successfully loaded ${combinedData.length} total WiFi access points from ${csvFiles.length} files`);
       } catch (err) {
         console.error('Error loading WiFi data:', err);
-        setError('Failed to load WiFi data. Please check the CSV file path.');
+        setError('Failed to load WiFi data. Please check the CSV file paths.');
       } finally {
         setLoading(false);
       }
@@ -63,6 +91,43 @@ export default function MapComponent({
 
     loadData();
   }, []);
+
+  // Filter WiFi data based on authentication type and search query
+  const filteredWifiData = useMemo(() => {
+    let filtered = wifiData;
+
+    // Filter by authentication type
+    if (authFilter && authFilter !== "all") {
+      filtered = filtered.filter((wifi) => {
+        const auth = wifi.AUTHENTICATION?.toLowerCase() || "";
+
+        switch (authFilter.toLowerCase()) {
+          case "wpa":
+            return auth.includes("wpa") && !auth.includes("wpa2") && !auth.includes("wpa3");
+          case "wpa2":
+            return auth.includes("wpa2");
+          case "wpa3":
+            return auth.includes("wpa3");
+          case "open":
+            return auth === "open" || auth === "" || auth.includes("open");
+          default:
+            return true;
+        }
+      });
+    }
+
+    // Filter by SSID (WiFi name) or BSSID (MAC address) search query
+    if (searchQuery && searchQuery.trim() !== "") {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter((wifi) => {
+        const ssid = String(wifi.SSID || "").toLowerCase();
+        const bssid = String(wifi.BSSID || "").toLowerCase();
+        return ssid.includes(query) || bssid.includes(query);
+      });
+    }
+
+    return filtered;
+  }, [wifiData, authFilter, searchQuery]);
 
   // Handle location detection
   const handleLocationDetection = async () => {
@@ -113,18 +178,18 @@ export default function MapComponent({
       });
 
       // Add marker to map
-      userMarkerRef.current = L.marker([userLocation.latitude, userLocation.longitude], { 
-        icon: userLocationIcon 
+      userMarkerRef.current = L.marker([userLocation.latitude, userLocation.longitude], {
+        icon: userLocationIcon
       })
-      .addTo(mapRef.current)
-      .bindPopup(`
+        .addTo(mapRef.current)
+        .bindPopup(`
         <div>
           <strong>You are here!</strong><br/>
           <small>Lat: ${userLocation.latitude.toFixed(6)}<br/>
           Lng: ${userLocation.longitude.toFixed(6)}</small>
         </div>
       `)
-      .openPopup();
+        .openPopup();
     }
   }, [userLocation]);
 
@@ -132,10 +197,10 @@ export default function MapComponent({
     <div className="relative h-full w-full">
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute top-15 left-1/2 transform -translate-x-1/2 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
-            <span className="text-sm font-medium">Loading WiFi data...</span>
+        <div className="absolute inset-0 z-[1000] flex items-center justify-center bg-white/80 backdrop-blur-sm">
+          <div className="flex flex-col items-center space-y-3">
+            <div className="animate-spin h-12 w-12 md:h-16 md:w-16 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+            <span className="text-sm md:text-base font-medium text-gray-700 hidden md:block">Loading WiFi data...</span>
           </div>
         </div>
       )}
@@ -144,15 +209,6 @@ export default function MapComponent({
       {error && (
         <div className="absolute top-15 left-1/2 transform -translate-x-1/2 z-[1000] bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded-lg max-w-md">
           <p className="text-sm">{error}</p>
-        </div>
-      )}
-
-      {/* WiFi data counter */}
-      {!loading && !error && wifiData.length > 0 && (
-        <div className="absolute top-15 left-4 z-[1000] bg-white px-4 py-2 rounded-lg shadow-lg">
-          <div className="text-sm">
-            <span className="font-semibold">Access Points:</span> {wifiData.length}
-          </div>
         </div>
       )}
 
@@ -177,7 +233,7 @@ export default function MapComponent({
         <ZoomControl position={zoomControlPosition} />
 
         {/* Render WiFi markers when data is loaded */}
-        {!loading && !error && wifiData.length > 0 && <WiFiMarkers data={wifiData} />}
+        {!loading && !error && filteredWifiData.length > 0 && <WiFiMarkers data={filteredWifiData} />}
       </MapContainer>
 
       {/* Location button */}
@@ -186,35 +242,6 @@ export default function MapComponent({
           position={locationButtonPosition}
           onClick={handleLocationDetection}
         />
-      )}
-
-      {/* Signal Strength Legend */}
-      {!loading && !error && wifiData.length > 0 && (
-        <div className="absolute bottom-20 left-4 z-[1000] bg-white p-3 rounded-lg shadow-lg">
-          <div className="text-sm font-semibold mb-2">Signal Strength</div>
-          <div className="space-y-1 text-xs">
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-              <span>Excellent (≥ -50 dBm)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#84cc16' }}></div>
-              <span>Good (-50 to -60 dBm)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#eab308' }}></div>
-              <span>Fair (-60 to -70 dBm)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f97316' }}></div>
-              <span>Poor (-70 to -80 dBm)</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-              <span>Very Poor (&lt; -80 dBm)</span>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

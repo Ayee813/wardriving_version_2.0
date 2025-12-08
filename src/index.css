@@ -40,6 +40,7 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
+
 :root {
   --background: #ffffff;
   --foreground: #333333;
@@ -193,13 +194,25 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
 }
 
 /*button active by id*/
-#button-active{
+#button-active {
   @apply bg-accent-foreground text-primary-foreground font-bold;
 }
 
+/* Hide scrollbar for mobile filter buttons */
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,4 +1,4 @@
-// src/components/analysis/FrequencyChart.tsx
+
 "use client"
 
 import * as React from "react"
