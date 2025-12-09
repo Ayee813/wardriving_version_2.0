@@ -32,6 +32,9 @@ export default function NavBar() {
             <Link to="/analysis" className="hover:opacity-80 transition-opacity">Analysis</Link>
           </li>
           <li>
+            <Link to="/game" className="hover:opacity-80 transition-opacity">Game</Link>
+          </li>
+          <li>
             <Link to="/about" className="hover:opacity-80 transition-opacity">AboutUs</Link>
           </li>
           <li>
@@ -93,6 +96,15 @@ export default function NavBar() {
                 className="block py-3 px-4 hover:bg-primary-foreground/10 rounded-md transition-colors"
               >
                 Analysis
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/game"
+                onClick={closeMobileMenu}
+                className="block py-3 px-4 hover:bg-primary-foreground/10 rounded-md transition-colors"
+              >
+                Game
               </Link>
             </li>
             <li>

@@ -105,16 +105,16 @@ const createSingleWiFiPopup = (wifi: WiFiData): string => {
   ];
 
   return `
-    <div class="w-full max-w-sm sm:max-w-md md:max-w-2xl mx-auto p-2 sm:p-3 space-y-2 sm:space-y-3">
-      <div class="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
-        <div class="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
-          <svg class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <div class="w-full max-w-sm sm:max-w-md md:max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto p-2 sm:p-3 lg:p-4 space-y-2 sm:space-y-3 lg:space-y-4">
+      <div class="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-2 sm:mb-3 lg:mb-4">
+        <div class="p-1.5 sm:p-2 lg:p-3 bg-blue-100 rounded-lg flex-shrink-0">
+          <svg class="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
           </svg>
         </div>
         <div class="min-w-0 flex-1">
-          <h2 class="text-base sm:text-lg md:text-xl font-bold text-gray-900 truncate">WiFi Network Details</h2>
-          <p class="text-xs sm:text-sm text-gray-500 hidden sm:block">Complete information about detected network</p>
+          <h2 class="text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-gray-900 truncate">WiFi Network Details</h2>
+          <p class="text-xs sm:text-sm lg:text-base text-gray-500 hidden sm:block">Complete information about detected network</p>
         </div>
       </div>
 
@@ -123,8 +123,8 @@ const createSingleWiFiPopup = (wifi: WiFiData): string => {
           <table class="w-full min-w-[280px]">
             <thead>
               <tr class="bg-gray-50 border-b">
-                <th class="text-left py-2 px-2 sm:px-3 font-semibold text-xs sm:text-sm text-gray-700">Property</th>
-                <th class="text-left py-2 px-2 sm:px-3 font-semibold text-xs sm:text-sm text-gray-700">Value</th>
+                <th class="text-left py-2 px-2 sm:px-3 lg:py-3 lg:px-4 font-semibold text-xs sm:text-sm lg:text-base text-gray-700">Property</th>
+                <th class="text-left py-2 px-2 sm:px-3 lg:py-3 lg:px-4 font-semibold text-xs sm:text-sm lg:text-base text-gray-700">Value</th>
               </tr>
             </thead>
             <tbody>
@@ -132,8 +132,8 @@ const createSingleWiFiPopup = (wifi: WiFiData): string => {
       .map(
         (row, index) => `
               <tr class="border-b hover:bg-gray-50 transition-colors">
-                <td class="py-2 px-2 sm:px-3 font-medium text-xs sm:text-sm text-gray-900">
-                  <div class="flex items-center gap-1 sm:gap-2">
+                <td class="py-2 px-2 sm:px-3 lg:py-3 lg:px-4 font-medium text-xs sm:text-sm lg:text-base text-gray-900">
+                  <div class="flex items-center gap-1 sm:gap-2 lg:gap-3">
                     ${row.icon
             ? `<span class="text-gray-500 flex-shrink-0">${getIcon(
               row.property
@@ -143,11 +143,11 @@ const createSingleWiFiPopup = (wifi: WiFiData): string => {
                     <span class="truncate">${row.property}</span>
                   </div>
                 </td>
-                <td class="py-2 px-2 sm:px-3 text-xs sm:text-sm text-gray-700">
-                  <div class="flex items-center gap-1 sm:gap-2 flex-wrap">
+                <td class="py-2 px-2 sm:px-3 lg:py-3 lg:px-4 text-xs sm:text-sm lg:text-base text-gray-700">
+                  <div class="flex items-center gap-1 sm:gap-2 lg:gap-3 flex-wrap">
                     <span class="break-all">${row.value}</span>
                     ${row.badge
-            ? `<span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium text-white ${row.badgeClass} whitespace-nowrap">${row.badge}</span>`
+            ? `<span class="inline-flex items-center px-1.5 sm:px-2 lg:px-2.5 py-0.5 lg:py-1 rounded-full text-[10px] sm:text-xs lg:text-sm font-medium text-white ${row.badgeClass} whitespace-nowrap">${row.badge}</span>`
             : ""
           }
                   </div>
@@ -374,8 +374,8 @@ export const WiFiMarkers: React.FC<WiFiMarkersProps> = ({ data }) => {
 
             // Bind popup
             individualMarker.bindPopup(createSingleWiFiPopup(wifi), {
-              maxWidth: 280,
-              minWidth: 250,
+              maxWidth: 900,
+              minWidth: 280,
               className: "wifi-custom-popup",
               autoPan: true,
               autoPanPadding: [10, 10],
