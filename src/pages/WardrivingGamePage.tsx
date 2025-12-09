@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import quizData from '../json/question.json';
 
 interface Question {
@@ -27,6 +28,8 @@ interface GameResult {
 const STORAGE_KEY = 'wardriving_quiz_results';
 
 export default function WardrivingGamePage() {
+    const navigate = useNavigate();
+
     // Game states
     const [gameState, setGameState] = useState<'entry' | 'playing' | 'result'>('entry');
     const [playerName, setPlayerName] = useState('');
@@ -79,7 +82,7 @@ export default function WardrivingGamePage() {
         setStartTime(Date.now());
     };
 
-    const saveResult = (finalScore: number, timeInSeconds: number) => {
+    const saveResult = async (finalScore: number, timeInSeconds: number) => {
         const result: GameResult = {
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             playerName: playerName.trim(),
@@ -89,26 +92,32 @@ export default function WardrivingGamePage() {
             completedAt: new Date().toISOString(),
         };
 
-        // Get existing results
-        const existingResults = localStorage.getItem(STORAGE_KEY);
-        const results: GameResult[] = existingResults ? JSON.parse(existingResults) : [];
+        try {
+            // Save to result.json via backend API
+            const response = await fetch('http://10.130.62.28:3001/api/save-result', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(result)
+            });
 
-        // Add new result
-        results.push(result);
-
-        // Save to localStorage
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
-
-        // Calculate rank
-        const sortedResults = [...results].sort((a, b) => {
-            if (b.score !== a.score) {
-                return b.score - a.score;
+            if (!response.ok) {
+                throw new Error('Failed to save result to server');
             }
-            return a.timeInSeconds - b.timeInSeconds;
-        });
 
-        const rank = sortedResults.findIndex(r => r.id === result.id) + 1;
-        setPlayerRank(rank);
+            // Also save to localStorage as backup
+            const existingResults = localStorage.getItem(STORAGE_KEY);
+            const results: GameResult[] = existingResults ? JSON.parse(existingResults) : [];
+            results.push(result);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+
+        } catch (error) {
+            console.error('Error saving result to server:', error);
+            // Fallback to localStorage only
+            const existingResults = localStorage.getItem(STORAGE_KEY);
+            const results: GameResult[] = existingResults ? JSON.parse(existingResults) : [];
+            results.push(result);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
+        }
     };
 
     const handleAnswerClick = (index: number) => {
@@ -126,7 +135,7 @@ export default function WardrivingGamePage() {
         }
     };
 
-    const handleNextQuestion = () => {
+    const handleNextQuestion = async () => {
         if (currentQuestionIndex < totalQuestions - 1) {
             setCurrentQuestionIndex(currentQuestionIndex + 1);
             setSelectedAnswer(null);
@@ -135,8 +144,10 @@ export default function WardrivingGamePage() {
             // Game finished
             const finalTime = Math.floor((Date.now() - startTime) / 1000);
             setElapsedTime(finalTime);
-            saveResult(score, finalTime);
-            setGameState('result');
+            await saveResult(score, finalTime);
+
+            // Navigate to map page instead of showing results
+            navigate('/map');
         }
     };
 
@@ -445,8 +456,8 @@ export default function WardrivingGamePage() {
                         onClick={handleNextQuestion}
                         disabled={!answeredQuestions[currentQuestionIndex]}
                         className={`w-full py-3 sm:py-4 rounded-lg font-semibold text-base sm:text-lg transition-all duration-200 ${answeredQuestions[currentQuestionIndex]
-                                ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer'
-                                : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg hover:shadow-xl transform hover:-translate-y-1 cursor-pointer'
+                            : 'bg-muted text-muted-foreground cursor-not-allowed opacity-50'
                             }`}
                     >
                         {currentQuestionIndex < totalQuestions - 1 ? 'ຄຳຖາມຕໍ່ໄປ →' : 'ສຳເລັດ ✓'}

@@ -20,7 +20,30 @@ export default function GameDashboardPage() {
         loadResults();
     }, []);
 
-    const loadResults = () => {
+    const loadResults = async () => {
+        try {
+            // Try to fetch from API first
+            const response = await fetch('http://localhost:3001/api/results');
+            if (response.ok) {
+                const parsedResults: GameResult[] = await response.json();
+                setResults(parsedResults);
+
+                // Sort by score (descending), then by time (ascending)
+                const sorted = [...parsedResults].sort((a, b) => {
+                    if (b.score !== a.score) {
+                        return b.score - a.score; // Higher score first
+                    }
+                    return a.timeInSeconds - b.timeInSeconds; // Faster time first
+                });
+
+                setTopPlayers(sorted.slice(0, 10)); // Top 10 players
+                return;
+            }
+        } catch (error) {
+            console.error('Error fetching from API:', error);
+        }
+
+        // Fallback to localStorage
         const storedResults = localStorage.getItem(STORAGE_KEY);
         if (storedResults) {
             const parsedResults: GameResult[] = JSON.parse(storedResults);
@@ -219,9 +242,9 @@ export default function GameDashboardPage() {
                                             >
                                                 <td className="py-4 px-4">
                                                     <span className={`inline-flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${rank === 1 ? 'bg-yellow-100 text-yellow-700' :
-                                                            rank === 2 ? 'bg-gray-100 text-gray-700' :
-                                                                rank === 3 ? 'bg-orange-100 text-orange-700' :
-                                                                    'bg-muted text-muted-foreground'
+                                                        rank === 2 ? 'bg-gray-100 text-gray-700' :
+                                                            rank === 3 ? 'bg-orange-100 text-orange-700' :
+                                                                'bg-muted text-muted-foreground'
                                                         }`}>
                                                         {getMedalEmoji(rank)}
                                                     </span>

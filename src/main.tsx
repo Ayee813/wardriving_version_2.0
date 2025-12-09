@@ -33,7 +33,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/about" element={<AboutUsPage />} />
           <Route path="/analysis" element={<AnalysisPage />} />
           <Route path="/game" element={<WardrivingGamePage />} />
-          <Route path="/game/leaderboard" element={<GameDashboardPage />} />
+          <Route path="/game_dashboard" element={<GameDashboardPage />} />
           <Route path="/contact" element={<ContactUs />} />
           <Route path="/login" element={<LoginPage />} />
 
