@@ -28,14 +28,14 @@
     },
     {
       "id": 3,
-      "question": "ຈາກຂໍ້ມູນຂອງ Wardriving, WiFi ໃຊ້ຄື້ນຄວາມຖີ່ໃດຫຼາຍທີ່ສຸດ?",
+      "question": "ຈາກຂໍ້ມູນຂອງ Project Wardriving, WiFi ໃຊ້ຄື້ນຄວາມຖີ່ໃດຫຼາຍທີ່ສຸດ?",
       "choices": ["900 MHz", "5 GHz", "2.4 GHz", "60 GHz"],
       "correct_index": 2,
-      "explanation": "2.4 GHz ແມ່ນຄວາມຖີ່ທີ່ນິຍົມທີ່ສຸດ ເພາະມັນມີໄລຍະສົ່ງທີ່ໄກກວ່າ."
+      "explanation": "2.4 GHz ແມ່ນຄວາມຖີ່ກທີ່ນິຍົມທີ່ສຸດ ເພາະມັນມີໄລຍະສົ່ງທີ່ໄກກວ່າ."
     },
     {
       "id": 4,
-      "question": "ຈາກຂໍ້ມູນຂອງ Project Wardriving, ແມ່ນອຸປະກອນໃດຖືໃຊ້ປ່ອຍຄື້ນສັນຍານ WiFi ຫຼາຍທີ່ສຸດ?",
+      "question": "ຈາກຂໍ້ມູນຂອງ Project Wardriving, ອຸປະກອນໃດແມ່ນຖືໃຊ້ປ່ອຍຄື້ນສັນຍານ WiFi ຫຼາຍທີ່ສຸດ?",
       "choices": ["ໂທລະສັບມືຖື", "Router", "Smart TV", "ລໍາໂພງ Bluetooth"],
       "correct_index": 1,
       "explanation": "Router  ແມ່ນອຸປະກອນທີ່ປ່ອຍສັນຍານ WiFi ໃນເຮືອນ ແລະ ຕຶກອາຄານ."

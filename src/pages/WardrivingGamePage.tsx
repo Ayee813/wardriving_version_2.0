@@ -94,7 +94,7 @@ export default function WardrivingGamePage() {
 
         try {
             // Save to result.json via backend API
-            const response = await fetch('http://10.130.62.28:3001/api/save-result', {
+            const response = await fetch('http://10.0.1.136:3001/api/save-result', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(result)

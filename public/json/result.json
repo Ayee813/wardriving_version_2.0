@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "176535161906914xvljuuy",
+    "playerName": "KL",
+    "score": 3,
+    "totalQuestions": 8,
+    "timeInSeconds": 14,
+    "completedAt": "2025-12-10T07:26:59.069Z"
+  },
+  {
+    "id": "1765351803919rkt9esqsn",
+    "playerName": "KK",
+    "score": 2,
+    "totalQuestions": 8,
+    "timeInSeconds": 20,
+    "completedAt": "2025-12-10T07:30:03.919Z"
+  },
+  {
+    "id": "17653519940296h0hr9qpd",
+    "playerName": "..",
+    "score": 8,
+    "totalQuestions": 8,
+    "timeInSeconds": 52,
+    "completedAt": "2025-12-10T07:33:14.029Z"
+  }
+]
